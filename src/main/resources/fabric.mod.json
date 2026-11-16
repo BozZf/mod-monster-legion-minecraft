@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "monster_legion",
+  "version": "${version}",
+  "name": "Monster Legion",
+  "description": "Monstros organizados sob uma lideran\u00e7a.",
+  "authors": [
+    "BozZf"
+  ],
+  "contact": {
+    "sources": "https://github.com/BozZf/mod-monster-legion-minecraft"
+  },
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "io.github.bozzf.monsterlegion.MonsterLegion"
+    ]
+  },
+  "mixins": [
+    "monster_legion.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.14",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
