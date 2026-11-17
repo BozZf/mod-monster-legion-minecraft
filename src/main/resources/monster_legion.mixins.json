@@ -6,7 +6,8 @@
     "MobEntityAccessor",
     "CommanderMobMixin",
     "SummonedMobMixin",
-    "SummonedLootMixin"
+    "SummonedLootMixin",
+    "SummonedFireMixin"
   ],
   "injectors": {
     "defaultRequire": 1

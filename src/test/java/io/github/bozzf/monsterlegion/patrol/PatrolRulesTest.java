@@ -40,7 +40,7 @@ class PatrolRulesTest {
         config.maxNearbyGroups = 10000;
         config.sanitize();
         assertEquals(20, config.attemptIntervalTicks);
-        assertEquals(0.25, config.spawnChance);
+        assertEquals(0.5, config.spawnChance);
         assertEquals(13, config.minGroupSize);
         assertEquals(13, config.maxGroupSize);
         assertEquals(32, config.minDistance);
@@ -48,4 +48,29 @@ class PatrolRulesTest {
         assertEquals(1, config.maxLoadedGroups);
         assertEquals(1, config.maxNearbyGroups);
     }
+    @Test void creativeCanSpawnPatrolsButSpectatorsAndDeadPlayersCannot() {
+        var config = new PatrolConfig();
+        assertTrue(config.eligiblePlayer(true, false, true));
+        assertTrue(config.eligiblePlayer(true, false, false));
+        assertFalse(config.eligiblePlayer(true, true, false));
+        assertFalse(config.eligiblePlayer(false, false, true));
+        config.spawnInCreative = false;
+        assertFalse(config.eligiblePlayer(true, false, true));
+        assertTrue(config.eligiblePlayer(true, false, false));
+    }
+    @Test void legacyDefaultsUpgradeButCustomFrequencyRemainsUntouched() {
+        var legacy = new PatrolConfig();
+        legacy.attemptIntervalTicks = 600;
+        legacy.spawnChance = 0.25;
+        legacy.upgradeLegacyDefaults();
+        assertEquals(400, legacy.attemptIntervalTicks);
+        assertEquals(0.5, legacy.spawnChance);
+        var custom = new PatrolConfig();
+        custom.attemptIntervalTicks = 1200;
+        custom.spawnChance = 0.1;
+        custom.upgradeLegacyDefaults();
+        assertEquals(1200, custom.attemptIntervalTicks);
+        assertEquals(0.1, custom.spawnChance);
+    }
+
 }

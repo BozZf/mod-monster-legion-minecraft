@@ -75,3 +75,7 @@ Os testes verificam regras de associação, nomes dos ossos, recursos de áudio,
 O modelo `lich.geo(2).json` substitui a geometria de execução; o original também fica em `art/leader/original/`. O ponto de encaixe agora é `staff_anchor`, filho de `braco_esquerdo`, com pivot `[0, 28, -6]`. A geometria independente da staff é alinhada pelo ponto de empunhadura e recebe uma correção local de orientação.
 
 O renderer aplica **180° adicionais** em Y sobre a correção anterior de 90° (total de 270°). A transformação é aplicada ao Lich e às suas camadas, incluindo glowmask e staff. É necessário conferir o resultado visual no jogo, pois testes de compilação não validam a aparência do encaixe.
+
+### Empunhadura inclinada (0.4.3)
+
+A pose local da staff agora aplica yaw de -90°, inclinação de **60° em Z** e um deslocamento de **+0,5 bloco** ao longo da haste em relação ao alinhamento anterior. Isso move a empunhadura do pixel 28 para o pixel 20 do modelo da staff, afastando o cristal da mão e inclinando a ponta para o lado. A rotação geral do Lich, que já estava correta, não foi alterada. O teste geométrico verifica o ponto de empunhadura no anchor; ainda é necessário conferir a aparência com animações no jogo.

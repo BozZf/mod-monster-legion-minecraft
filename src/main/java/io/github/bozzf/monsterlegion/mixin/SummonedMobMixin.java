@@ -5,6 +5,9 @@ import io.github.bozzf.monsterlegion.combat.Summoning;
 import java.util.UUID;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.data.DataTracker;
+import net.minecraft.entity.data.TrackedData;
+import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.nbt.NbtCompound;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -18,22 +21,38 @@ public abstract class SummonedMobMixin implements SummonData {
     @Unique private UUID monsterLegion$lich;
     @Unique private UUID monsterLegion$player;
     @Unique private long monsterLegion$expires;
-    @Unique private boolean monsterLegion$summoned;
+    @Unique private static final TrackedData<Boolean> monsterLegion$CONJURED =
+            DataTracker.registerData(MobEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     public UUID monsterLegion$lichOwner() { return monsterLegion$lich; }
     public void monsterLegion$lichOwner(UUID value) { monsterLegion$lich = value; }
     public UUID monsterLegion$playerOwner() { return monsterLegion$player; }
     public void monsterLegion$playerOwner(UUID value) { monsterLegion$player = value; }
     public long monsterLegion$expiresAt() { return monsterLegion$expires; }
     public void monsterLegion$expiresAt(long value) { monsterLegion$expires = value; }
-    public boolean monsterLegion$conjured() { return monsterLegion$summoned; }
-    public void monsterLegion$conjured(boolean value) { monsterLegion$summoned = value; }
+    public boolean monsterLegion$conjured() {
+        MobEntity mob = (MobEntity) (Object) this;
+        return mob.getDataTracker() != null && mob.getDataTracker().get(monsterLegion$CONJURED);
+    }
+    public void monsterLegion$conjured(boolean value) {
+        ((MobEntity) (Object) this).getDataTracker().set(monsterLegion$CONJURED, value);
+    }
+    @Inject(method = "initDataTracker", at = @At("TAIL"))
+    private void monsterLegion$trackConjured(DataTracker.Builder builder, CallbackInfo ci) {
+        builder.add(monsterLegion$CONJURED, false);
+    }
+    @Inject(method = "tick", at = @At("TAIL"))
+    private void monsterLegion$burnInSunlight(CallbackInfo ci) {
+        MobEntity mob = (MobEntity) (Object) this;
+        if (monsterLegion$conjured() && !mob.getWorld().isClient && mob.isAlive()
+                && ((MobEntityAccessor) mob).monsterLegion$isAffectedByDaylight()) mob.setOnFireFor(8);
+    }
     @Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
     private void monsterLegion$save(NbtCompound nbt, CallbackInfo ci) {
         NbtCompound data = new NbtCompound();
         if (monsterLegion$lich != null) data.putUuid("Lich", monsterLegion$lich);
         if (monsterLegion$player != null) data.putUuid("Player", monsterLegion$player);
         data.putLong("Expires", monsterLegion$expires);
-        data.putBoolean("Conjured", monsterLegion$summoned);
+        data.putBoolean("Conjured", monsterLegion$conjured());
         nbt.put("MonsterLegionSummon", data);
     }
     @Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
@@ -42,7 +61,7 @@ public abstract class SummonedMobMixin implements SummonData {
         monsterLegion$lich = data.containsUuid("Lich") ? data.getUuid("Lich") : null;
         monsterLegion$player = data.containsUuid("Player") ? data.getUuid("Player") : null;
         monsterLegion$expires = data.getLong("Expires");
-        monsterLegion$summoned = data.getBoolean("Conjured");
+        monsterLegion$conjured(data.getBoolean("Conjured"));
     }
     @Inject(method = "convertTo", at = @At("RETURN"))
     private <T extends MobEntity> void monsterLegion$convert(EntityType<T> type, boolean keepEquipment,

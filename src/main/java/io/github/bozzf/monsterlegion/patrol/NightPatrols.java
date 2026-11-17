@@ -59,7 +59,7 @@ public final class NightPatrols {
     public static void tick(ServerWorld world) {
         if (!allowed(world) || world.getTime() % config.attemptIntervalTicks != 0) return;
         List<ServerPlayerEntity> players = world.getPlayers().stream()
-                .filter(p -> p.isAlive() && !p.isSpectator() && !p.isCreative()).toList();
+                .filter(p -> config.eligiblePlayer(p.isAlive(), p.isSpectator(), p.isCreative())).toList();
         if (players.isEmpty() || world.random.nextDouble() >= config.spawnChance) return;
         spawnNear(world, players.get(world.random.nextInt(players.size())));
     }
@@ -76,7 +76,7 @@ public final class NightPatrols {
             }
             if (entity instanceof HostileEntity && entity.squaredDistanceTo(player) < 128 * 128) nearbyMonsters++;
         }
-        if (loadedGroups >= config.maxLoadedGroups || nearbyGroups >= config.maxNearbyGroups || nearbyMonsters >= 64) return null;
+        if (loadedGroups >= config.maxLoadedGroups || nearbyGroups >= config.maxNearbyGroups || nearbyMonsters >= config.maxNearbyHostiles) return null;
         for (int attempt = 0; attempt < 24; attempt++) {
             double angle = world.random.nextDouble() * Math.PI * 2;
             double distance = config.minDistance + world.random.nextDouble() * (config.maxDistance - config.minDistance);

@@ -201,6 +201,7 @@ public final class Summoning {
             for (MobEntity mob : loaded) {
                 SummonData data = (SummonData) mob;
                 if (data.monsterLegion$playerOwner() != null || data.monsterLegion$conjured()) onLoad(mob, world);
+                if (mob.isAlive()) SummonTeleport.followPlayer(mob);
                 if (!data.monsterLegion$conjured() && data.monsterLegion$lichOwner() != null
                         && LichAllies.leader(mob) == null) {
                     data.monsterLegion$lichOwner(null);

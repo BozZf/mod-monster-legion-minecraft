@@ -92,4 +92,11 @@ class LichCombatTest {
         slots.remove(owner, old);
         assertNotNull(slots.get(owner));
     }
+    @Test void friendlyCreatureGroupsAreNotRejectedLikeHostileMonsters() {
+        assertTrue(LichDamageRules.friendlyGroup(net.minecraft.entity.SpawnGroup.MISC));
+        assertTrue(LichDamageRules.friendlyGroup(net.minecraft.entity.SpawnGroup.CREATURE));
+        assertTrue(LichDamageRules.friendlyGroup(net.minecraft.entity.SpawnGroup.WATER_CREATURE));
+        assertFalse(LichDamageRules.friendlyGroup(net.minecraft.entity.SpawnGroup.MONSTER));
+    }
+
 }

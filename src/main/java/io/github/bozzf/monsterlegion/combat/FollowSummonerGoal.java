@@ -17,10 +17,10 @@ public final class FollowSummonerGoal extends Goal {
         SummonData data = (SummonData) mob;
         owner = data.monsterLegion$playerOwner() != null
                 ? mob.getWorld().getPlayerByUuid(data.monsterLegion$playerOwner()) : LichAllies.leader(mob);
-        return owner != null && owner.isAlive() && mob.getTarget() == null && mob.squaredDistanceTo(owner) > 16;
+        return owner != null && owner.isAlive() && owner.getWorld() == mob.getWorld() && mob.getTarget() == null && mob.squaredDistanceTo(owner) > 16;
     }
     @Override public boolean shouldContinue() {
-        return owner != null && owner.isAlive() && mob.getTarget() == null && mob.squaredDistanceTo(owner) > 9
+        return owner != null && owner.isAlive() && owner.getWorld() == mob.getWorld() && mob.getTarget() == null && mob.squaredDistanceTo(owner) > 9
                 && (((SummonData) mob).monsterLegion$playerOwner() != null || LichAllies.leader(mob) == owner);
     }
     @Override public void start() { ticks = 0; }

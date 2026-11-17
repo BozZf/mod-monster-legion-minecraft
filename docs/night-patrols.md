@@ -2,7 +2,7 @@
 
 ## Funcionamento
 
-Grupos de monstros aparecem aleatoriamente na superfície escura do Overworld, durante a noite (horário 13000 a 22999). Não aparecem no Pacífico nem quando `doMobSpawning` está desativado. A tentativa natural precisa de um jogador vivo em sobrevivência ou aventura; criativo e espectador não geram tentativas.
+Grupos de monstros aparecem aleatoriamente na superfície escura do Overworld, durante a noite (horário 13000 a 22999). Não aparecem no Pacífico nem quando `doMobSpawning` está desativado. A tentativa natural precisa de um jogador vivo em sobrevivência, aventura ou criativo. Espectadores não geram tentativas. Criativo pode ser desativado pela configuração `spawnInCreative`.
 
 Cada grupo tem, por padrão, 5 a 8 monstros, incluindo um comandante. Os participantes são zumbis, esqueletos, husks, strays e aranhas; há pelo menos dois tipos no grupo. O comandante é escolhido entre os quatro mortos-vivos adultos e usa espada, capacete, peitoral, calças e botas de netherita. Esqueletos comandantes usam a IA de combate corpo a corpo ao receber a espada.
 
@@ -31,13 +31,16 @@ Os grupos só são criados à noite; os existentes não somem instantaneamente a
 
 ## Limites e configurações
 
-O arquivo `config/monster_legion-patrols.json` é criado na inicialização. Edite e reinicie o servidor/jogo:
+O arquivo `config/monster_legion-patrols.json` é criado na inicialização. Configurações antigas sem versão que ainda usam o par padrão 600 ticks/25% são migradas automaticamente para 400 ticks/50%. Frequências personalizadas são preservadas. Edite e reinicie o servidor/jogo:
 
 ```json
 {
+  "configVersion": 2,
   "enabled": true,
-  "attemptIntervalTicks": 600,
-  "spawnChance": 0.25,
+  "spawnInCreative": true,
+  "maxNearbyHostiles": 96,
+  "attemptIntervalTicks": 400,
+  "spawnChance": 0.5,
   "minGroupSize": 5,
   "maxGroupSize": 8,
   "minDistance": 48,
@@ -47,9 +50,9 @@ O arquivo `config/monster_legion-patrols.json` é criado na inicialização. Edi
 }
 ```
 
-- Uma tentativa a cada 30 segundos por mundo, com 25% de chance. Um jogador elegível é escolhido; a chance não é multiplicada pela quantidade de jogadores.
+- Uma tentativa a cada 20 segundos por mundo, com 50% de chance. Um jogador elegível é escolhido; a chance não é multiplicada pela quantidade de jogadores.
 - A tentativa procura local de 48 a 96 blocos do jogador escolhido; todo monstro aparece a pelo menos 32 blocos de qualquer jogador não espectador.
-- No máximo 8 comandantes vivos carregados no mundo e 2 a menos de 192 blocos do jogador escolhido. Também se bloqueia a tentativa quando já há 64 monstros hostis a menos de 128 blocos desse jogador.
+- No máximo 8 comandantes vivos carregados no mundo e 2 a menos de 192 blocos do jogador escolhido. Também se bloqueia a tentativa quando já há 96 monstros hostis (`maxNearbyHostiles`) a menos de 128 blocos desse jogador.
 - Busca limitada a 24 centros e 64 posições de seguidores por centro. Não carrega nem gera chunks para procurar local.
 - Respeita fronteira do mundo, terreno sólido, ausência de fluido, escuridão vanilla e colisões. Se não cabe o tamanho mínimo, descarta o grupo parcial sem loot/XP.
 - Não funciona no Nether ou End. Patrulhas fora dos chunks carregados não entram no limite de grupos carregados.
@@ -64,7 +67,7 @@ Em um mundo de teste, com comandos e dificuldade normal:
 /monsterlegion patrol
 ```
 
-O comando retorna as coordenadas do grupo se encontrar terreno válido. Pode ser usado em criativo para teste, mas preserva noite, escuridão, gamerules e limites; ignora apenas o sorteio e o intervalo da tentativa natural. Procure uma área ampla, escura e carregada, fora da base iluminada.
+O comando retorna as coordenadas do grupo se encontrar terreno válido. Pode ser usado em criativo para teste; as tentativas naturais também incluem criativo por padrão. Preserva noite, escuridão, gamerules e limites; ignora apenas o sorteio e o intervalo da tentativa natural. Procure uma área ampla, escura e carregada, fora da base iluminada.
 
 Para localizar comandantes por seletor, use `@e[tag=monster_legion.commander]`. A armadura torna o comandante reconhecível sem nome permanente.
 
@@ -79,3 +82,5 @@ Para localizar comandantes por seletor, use `@e[tag=monster_legion.commander]`. 
 7. Verificar ausência de novas patrulhas de dia, no Pacífico, com `doMobSpawning false`, em área iluminada ou em chunks não carregados.
 
 Testes automáticos cobrem horário, multiplicação de XP, reconhecimento das tags salvas e limites da configuração; navegação, drops e interação com outros mods ainda precisam ser observados no jogo.
+
+Ao testar voando, mantenha o chão a menos de 128 blocos de algum jogador: as patrulhas usam despawn vanilla e não forçam chunks a ficarem carregados. Modo criativo permite geração, mas não elimina a exigência de terreno escuro nem a ausência de mobs no Pacífico.

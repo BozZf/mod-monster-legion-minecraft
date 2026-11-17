@@ -194,7 +194,8 @@ public final class LichKingEntity extends HostileEntity implements GeoEntity {
         boolean fire = source.isOf(DamageTypes.ON_FIRE) || source.isOf(DamageTypes.IN_FIRE)
                 || source.isOf(DamageTypes.LAVA);
         if (!bypass && !fire) {
-            if (!(source.getAttacker() instanceof PlayerEntity)
+            if (LichAllies.allied(this, source.getAttacker())) return false;
+            if (!io.github.bozzf.monsterlegion.combat.LichDamageRules.allowedAttacker(source.getAttacker())
                     && !source.isIn(DamageTypeTags.ALWAYS_HURTS_ENDER_DRAGONS)) return false;
             if (!headHit(source)) amount = LichRules.dragonBodyDamage(amount);
         }

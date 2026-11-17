@@ -30,9 +30,7 @@ public final class LichKingRenderer extends GeoEntityRenderer<LichKingEntity> {
             @Override protected void renderStackForBone(MatrixStack matrices, GeoBone bone, ItemStack stack,
                     LichKingEntity entity, VertexConsumerProvider vertices, float tickDelta, int light, int overlay) {
                 matrices.push();
-                // Align the standalone staff grip (0, 28, 0) to the dedicated hand anchor.
-                matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-90));
-                matrices.translate(0, -28.0 / 16.0, 0);
+                StaffGripTransform.apply(matrices);
                 super.renderStackForBone(matrices, bone, stack, entity, vertices, tickDelta, light, overlay);
                 matrices.pop();
             }

@@ -4,7 +4,7 @@
 
 O Rei Lich tem **200 pontos de vida (100 corações)**, sem pontos extras de armadura/toughness. A defesa adapta a lógica do corpo do Ender Dragon: dano no corpo é reduzido para `dano / 4 + min(dano, 1)`; acertos na cabeça têm dano normal. A região superior começa a 2,7 blocos da base. Para projéteis, verifica-se a altura do impacto; para ataques corpo a corpo, a interseção do olhar do atacante com a hitbox. Não é uma entidade multipartes como o dragão.
 
-Como referência de defesa, ataques de jogadores e explosões podem feri-lo, mas ataques comuns de outros mobs e efeitos de status não. Dano que ignora invulnerabilidade continua válido. Há uma exceção explícita para fogo: **o Rei Lich queima ao sol**, usando a verificação vanilla de luz, céu e exposição, e também pode receber dano de fogo/lava. A coroa é parte do modelo, não um capacete de equipamento.
+Como referência de defesa, ataques de jogadores, golems, criaturas de grupos não hostis (como animais/pets), invocações do jogador e explosões podem feri-lo. Ataques de monstros hostis comuns continuam bloqueados, assim como efeitos de status. Cada criatura conserva seu dano base vanilla: um projétil de dano zero não recebe dano artificial. Dano que ignora invulnerabilidade continua válido. Há uma exceção explícita para fogo: **o Rei Lich queima ao sol**, usando a verificação vanilla de luz, céu e exposição, e também pode receber dano de fogo/lava. A coroa é parte do modelo, não um capacete de equipamento.
 
 Entidades antigas da versão anterior são migradas para os novos atributos ao carregar, mantendo a proporção da vida restante.
 
@@ -53,6 +53,7 @@ A staff não é equipamento segurado pela entidade, de modo que o renderer do ca
 
 Botão direito invoca **um** monstro e um conjunto de armadura dos mesmos sorteios da magia do Lich, **sem tocar o áudio summon**. O áudio da conjuração do próprio Lich permanece.
 
+- Teleporta para perto do dono quando a distância chega a **12 blocos**, verificado uma vez por segundo, inclusive se estava em combate. Só usa terreno sólido, sem colisão/fluidos, em chunks já carregados da mesma dimensão. Não teleporta se estiver montado, carregando passageiros ou preso por laço. Em pleno voo sem chão seguro por perto, aguarda uma posição válida. O teleporte não renova os cinco minutos.
 - É **aliado do jogador**, acompanha-o e ataca quem o jogador atacou ou quem o feriu recentemente, sem escolher o dono como alvo.
 - Duração de **6.000 ticks = cinco minutos de jogo ativo**. Descarregar chunks ou trocar de dimensão não reinicia o prazo. Ao expirar, o mob recebe dano letal pela rotina normal de morte, com som/animação vanilla e sem drops/XP. Se estiver descarregado, morre assim que carregar. O corpo permanece pelo tempo normal da morte antes da remoção; não se usa desaparecimento direto para expiração.
 - **Uma invocação ativa por jogador**, compartilhada entre todos os cajados e dimensões. A reserva fica em PersistentState e o vínculo/prazo ficam salvos no NBT do mob.
@@ -60,6 +61,7 @@ Botão direito invoca **um** monstro e um conjunto de armadura dos mesmos sortei
 - Transformações vanilla transferem a identidade e mantêm o prazo original.
 - Se não há posição segura, não se ocupa uma vaga nem se cria um mob preso em blocos.
 - Invocações conjuradas pelo Lich ou pela staff não produzem loot, equipamento ou XP, evitando farm de armaduras aleatórias.
+- Todos os mortos-vivos conjurados queimam com exposição ao sol, inclusive de capacete e incluindo o esqueleto Wither invocado. Sombra e água/chuva continuam protegendo conforme a verificação de exposição vanilla. A imunidade nativa a fogo é removida somente dos mobs conjurados; espécies naturais não são alteradas.
 
 A staff deixa de atirar o projétil provisório da versão anterior; sua magia de uso agora é summon. A animação original de rotação da joia permanece.
 
@@ -75,6 +77,6 @@ O ovo tem entrada própria na aba de ovos do criativo. A staff aparece nas abas 
 
 Ao testar a expiração, observar o som/animação de morte, a permanência breve do corpo e ausência de qualquer item ou XP. A vaga é liberada quando o invocado morre, sem esperar a remoção do corpo. A proteção de drops vale tanto para invocados do Lich quanto para os do jogador, inclusive mortes em combate e com Saque.
 
-Conferir no jogo: novo encaixe `staff_anchor`, rotação adicional de 180°, cooldowns de 60/10 segundos, morte dos invocados junto ao Lich (incluindo recarga de chunks), sorteio de mobs/armaduras, colisão da caveira sem explosão, efeitos por 10 s, cura gradual no Lich, foco aleatório com dois jogadores, queimadura ao sol, loot em múltiplas mortes e vida/XP. Para a staff, conferir morte, cinco minutos, dois cajados, dois jogadores, troca de dimensão, transformação do mob e save/reload com o invocado descarregado.
+Conferir no jogo: dano de golem/pets/invocados do jogador, sol com e sem capacete (inclusive esqueleto Wither), teleporte ao afastar 12 blocos sem reiniciar prazo, novo encaixe `staff_anchor`, rotação adicional de 180°, cooldowns de 60/10 segundos, morte dos invocados junto ao Lich (incluindo recarga de chunks), sorteio de mobs/armaduras, colisão da caveira sem explosão, efeitos por 10 s, cura gradual no Lich, foco aleatório com dois jogadores, queimadura ao sol, loot em múltiplas mortes e vida/XP. Para a staff, conferir morte, cinco minutos, dois cajados, dois jogadores, troca de dimensão, transformação do mob e save/reload com o invocado descarregado.
 
 Os testes automatizados cobrem os números de combate, orçamento/duração/persistência da cura e exclusividade/transferência da reserva de invocação. O workflow compila o mod e verifica carregamento em servidor dedicado; a observação da luta dentro do jogo permanece necessária.
