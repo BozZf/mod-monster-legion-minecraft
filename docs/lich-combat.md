@@ -53,7 +53,7 @@ A staff não é equipamento segurado pela entidade, de modo que o renderer do ca
 Botão direito invoca um monstro e um conjunto de armadura dos mesmos sorteios da magia do Lich.
 
 - É **aliado do jogador**, acompanha-o e ataca quem o jogador atacou ou quem o feriu recentemente, sem escolher o dono como alvo.
-- Duração de **6.000 ticks = cinco minutos de jogo ativo**. Descarregar chunks ou trocar de dimensão não reinicia o prazo. Ao expirar descarregado, o mob é removido assim que carregar.
+- Duração de **6.000 ticks = cinco minutos de jogo ativo**. Descarregar chunks ou trocar de dimensão não reinicia o prazo. Ao expirar, o mob recebe dano letal pela rotina normal de morte, com som/animação vanilla e sem drops/XP. Se estiver descarregado, morre assim que carregar. O corpo permanece pelo tempo normal da morte antes da remoção; não se usa desaparecimento direto para expiração.
 - **Uma invocação ativa por jogador**, compartilhada entre todos os cajados e dimensões. A reserva fica em PersistentState e o vínculo/prazo ficam salvos no NBT do mob.
 - Morte do invocado libera a vaga. Mudar de item, desconectar, recarregar chunks ou reiniciar o servidor não cria uma segunda vaga.
 - Transformações vanilla transferem a identidade e mantêm o prazo original.
@@ -70,7 +70,9 @@ A staff deixa de atirar o projétil provisório da versão anterior; sua magia d
 /summon monster_legion:lich_king ~ ~ ~
 ```
 
-O ovo tem entrada própria na aba de ovos do criativo. Use um mundo de teste: a defesa e os aliados tornam o combate bem diferente da versão anterior.
+O ovo tem entrada própria na aba de ovos do criativo. A staff aparece nas abas **Ferramentas e utilidades** e **Combate** da edição Java, além da busca do criativo. Use um mundo de teste: a defesa e os aliados tornam o combate bem diferente da versão anterior.
+
+Ao testar a expiração, observar o som/animação de morte, a permanência breve do corpo e ausência de qualquer item ou XP. A vaga é liberada quando o invocado morre, sem esperar a remoção do corpo. A proteção de drops vale tanto para invocados do Lich quanto para os do jogador, inclusive mortes em combate e com Saque.
 
 Conferir no jogo: sorteio de mobs/armaduras, colisão da caveira sem explosão, efeitos por 10 s, cura gradual no Lich, foco aleatório com dois jogadores, queimadura ao sol, loot em múltiplas mortes e vida/XP. Para a staff, conferir morte, cinco minutos, dois cajados, dois jogadores, troca de dimensão, transformação do mob e save/reload com o invocado descarregado.
 

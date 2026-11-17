@@ -89,7 +89,7 @@ public final class Summoning {
         SummonSlots.Slot old = state.slots.get(player.getUuid());
         if (old != null) {
             if (old.expiresAt() > now(server)) return "Você já possui uma invocação ativa (máximo de uma por jogador).";
-            discard(server, old.entity());
+            expire(server, old.entity());
             state.slots.remove(player.getUuid(), old.entity());
             state.markDirty();
         }
@@ -112,18 +112,28 @@ public final class Summoning {
         world.playSound(null, player.getX(), player.getY(), player.getZ(), ModContent.SOUNDS.get("summon"), SoundCategory.PLAYERS, 1, 1);
         return null;
     }
-    private static void discard(MinecraftServer server, java.util.UUID uuid) {
+    private static void expire(MinecraftServer server, java.util.UUID uuid) {
         for (ServerWorld world : server.getWorlds()) {
             Entity entity = world.getEntity(uuid);
-            if (entity != null) entity.discard();
+            if (entity instanceof MobEntity mob) expire(mob);
+        }
+    }
+    private static void expire(MobEntity mob) {
+        if (mob.isAlive()) {
+            // Use the normal death path, preserving death sounds/animation and the loot suppression.
+            mob.damage(mob.getDamageSources().genericKill(), Float.MAX_VALUE);
         }
     }
     public static void onLoad(MobEntity mob, ServerWorld world) {
         SummonData data = (SummonData) mob;
-        if (data.monsterLegion$playerOwner() == null) return;
+        if (data.monsterLegion$playerOwner() == null || !mob.isAlive()) return;
+        if (data.monsterLegion$expiresAt() <= now(world.getServer())) {
+            expire(mob);
+            return;
+        }
         var slot = StaffSummonState.get(world.getServer()).slots.get(data.monsterLegion$playerOwner());
-        if (slot == null || !slot.entity().equals(mob.getUuid())
-                || data.monsterLegion$expiresAt() <= now(world.getServer())) mob.discard();
+        // Only invalid/duplicated reservations are discarded, never an expired legitimate summon.
+        if (slot == null || !slot.entity().equals(mob.getUuid())) mob.discard();
     }
     public static void onDeath(MobEntity mob) {
         SummonData data = (SummonData) mob;
@@ -150,7 +160,7 @@ public final class Summoning {
         StaffSummonState state = StaffSummonState.get(server);
         state.slots.snapshot().forEach((owner, slot) -> {
             if (slot.expiresAt() <= time) {
-                discard(server, slot.entity());
+                expire(server, slot.entity());
                 state.slots.remove(owner, slot.entity());
                 state.markDirty();
             }

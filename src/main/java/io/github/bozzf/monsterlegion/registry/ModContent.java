@@ -42,6 +42,7 @@ public final class ModContent {
         FabricDefaultAttributeRegistry.register(LICH_KING, LichKingEntity.attributes());
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.SPAWN_EGGS).register(e -> e.add(LICH_KING_SPAWN_EGG));
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.COMBAT).register(e -> e.add(LICH_STAFF));
+        ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(e -> e.add(LICH_STAFF));
     }
     private ModContent() { }
 }
