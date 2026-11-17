@@ -16,6 +16,13 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - run: chmod +x gradlew
       - run: ./gradlew --no-daemon build
+      - name: Verify dedicated server bootstrap
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 180s ./gradlew --no-daemon runServer --args=nogui | tee server-bootstrap.log
+          grep -F 'Monster Legion initialized' run/logs/latest.log
+          grep -F 'You need to agree to the EULA' run/logs/latest.log
       - uses: actions/upload-artifact@v4
         with:
           name: monster-legion
