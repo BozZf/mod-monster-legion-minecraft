@@ -19,13 +19,17 @@ public final class MonsterLegion implements ModInitializer {
     public void onInitialize() {
         io.github.bozzf.monsterlegion.registry.ModContent.initialize();
         io.github.bozzf.monsterlegion.command.LichCommands.initialize();
+        io.github.bozzf.monsterlegion.patrol.NightPatrols.initialize();
         ServerEntityEvents.ENTITY_LOAD.register((entity, world) -> {
             if (entity instanceof PathAwareEntity mob) {
+                ((MobEntityAccessor) mob).monsterLegion$getTargetSelector()
+                        .add(0, new io.github.bozzf.monsterlegion.patrol.ObeyCommanderGoal(mob));
                 ((MobEntityAccessor) mob).monsterLegion$getGoalSelector()
                         .add(2, new FollowLeaderGoal(mob));
             }
         });
         ServerTickEvents.END_WORLD_TICK.register(LegionManager::tick);
+        ServerTickEvents.END_WORLD_TICK.register(io.github.bozzf.monsterlegion.patrol.NightPatrols::tick);
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> LegionManager.clear());
         LOGGER.info("Monster Legion initialized");
     }

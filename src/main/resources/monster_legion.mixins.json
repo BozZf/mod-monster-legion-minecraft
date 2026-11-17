@@ -3,7 +3,8 @@
   "package": "io.github.bozzf.monsterlegion.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "MobEntityAccessor"
+    "MobEntityAccessor",
+    "CommanderMobMixin"
   ],
   "injectors": {
     "defaultRequire": 1
