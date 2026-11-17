@@ -14,7 +14,7 @@ Não é necessário ativar uma opção global do GeckoLib. O mod registra os con
 /give @s monster_legion:lich_king_spawn_egg
 ```
 
-O Rei Lich é hostil, voa para se aproximar de jogadores, invoca até dois zumbis por conjuração respeitando o limite da legião, compartilha seu alvo e lança projéteis mágicos. A staff também lança projéteis com botão direito (intervalo de 1,5 segundo). O projétil usa provisoriamente a aparência da pérola do End e causa 8 pontos de dano mágico, sem explosão. O líder tem 120 pontos de vida e não possui geração natural nesta versão.
+O Rei Lich é hostil e usa o sistema de [combate, invocação e recompensas](lich-combat.md). Ele tem 200 pontos de vida, queima ao sol e sua caveira aplica Wither/Fome sem explosão. A staff invoca um aliado temporário (uma vaga por jogador, cinco minutos). Os valores e regras completos estão no guia de combate. Ainda não há geração natural do Rei Lich.
 
 Use um mundo de teste. Para verificar cada animação sem esperar pela IA, afaste o líder de jogadores em sobrevivência e use:
 

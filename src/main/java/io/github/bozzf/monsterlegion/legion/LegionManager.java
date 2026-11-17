@@ -43,6 +43,8 @@ public final class LegionManager {
                     leader.getBoundingBox().expand(RECRUIT_RADIUS),
                     mob -> mob.isAlive() && !isLeader(mob) && mob.getType().isIn(RECRUITABLE)
                             && PatrolIdentity.canRecruit(leader, mob)
+                            && ((io.github.bozzf.monsterlegion.combat.SummonData) mob).monsterLegion$lichOwner() == null
+                            && ((io.github.bozzf.monsterlegion.combat.SummonData) mob).monsterLegion$playerOwner() == null
                             && mob.squaredDistanceTo(leader) <= RECRUIT_RADIUS * RECRUIT_RADIUS)) {
                 roster.recruit(leader.getUuid(), member.getUuid());
                 LivingEntity target = leader.getTarget();
@@ -57,6 +59,9 @@ public final class LegionManager {
 
     public static PathAwareEntity leaderFor(PathAwareEntity member) {
         if (!(member.getWorld() instanceof ServerWorld world)) return null;
+        var lich = io.github.bozzf.monsterlegion.combat.LichAllies.leader(member);
+        if (lich != null) return lich;
+        if (((io.github.bozzf.monsterlegion.combat.SummonData) member).monsterLegion$playerOwner() != null) return null;
         LegionRoster roster = ROSTERS.get(world);
         if (roster == null || roster.leaderOf(member.getUuid()) == null) return null;
         Entity entity = world.getEntity(roster.leaderOf(member.getUuid()));
@@ -70,14 +75,16 @@ public final class LegionManager {
     }
 
     public static boolean isLegionMember(PathAwareEntity leader, LivingEntity entity) {
-        return entity == leader || PatrolIdentity.sameGroup(leader, entity)
+        return io.github.bozzf.monsterlegion.combat.LichAllies.allied(leader, entity) || PatrolIdentity.sameGroup(leader, entity)
                 || (entity instanceof PathAwareEntity mob && leaderFor(mob) == leader);
     }
 
     public static boolean tryRecruit(PathAwareEntity leader, PathAwareEntity member) {
         if (!(leader.getWorld() instanceof ServerWorld world) || member.getWorld() != world
                 || !isLeader(leader) || isLeader(member) || !member.getType().isIn(RECRUITABLE)
-                || !PatrolIdentity.canRecruit(leader, member)) return false;
+                || !PatrolIdentity.canRecruit(leader, member)
+                || ((io.github.bozzf.monsterlegion.combat.SummonData) member).monsterLegion$lichOwner() != null
+                || ((io.github.bozzf.monsterlegion.combat.SummonData) member).monsterLegion$playerOwner() != null) return false;
         return ROSTERS.computeIfAbsent(world, ignored -> new LegionRoster(MAX_MEMBERS))
                 .recruit(leader.getUuid(), member.getUuid());
     }

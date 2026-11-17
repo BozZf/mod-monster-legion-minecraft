@@ -1,6 +1,8 @@
 package io.github.bozzf.monsterlegion.item;
 
-import io.github.bozzf.monsterlegion.entity.LichBoltEntity;
+import io.github.bozzf.monsterlegion.combat.Summoning;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import io.github.bozzf.monsterlegion.registry.ModContent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -26,13 +28,13 @@ public final class LichStaffItem extends Item implements GeoItem {
     @Override public AnimatableInstanceCache getAnimatableInstanceCache() { return cache; }
     @Override public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         ItemStack stack = player.getStackInHand(hand);
-        if (!world.isClient) {
-            LichBoltEntity bolt = new LichBoltEntity(world, player);
-            bolt.setVelocity(player, player.getPitch(), player.getYaw(), 0, 1.5F, 0.5F);
-            world.spawnEntity(bolt);
-            world.playSound(null, player.getX(), player.getY(), player.getZ(), ModContent.SOUNDS.get("magic_bolt"),
-                    SoundCategory.PLAYERS, 1, 1);
-            player.getItemCooldownManager().set(this, 30);
+        if (player instanceof ServerPlayerEntity serverPlayer) {
+            String error = Summoning.byPlayer(serverPlayer);
+            if (error != null) {
+                player.sendMessage(Text.literal(error), true);
+                return TypedActionResult.fail(stack);
+            }
+            player.getItemCooldownManager().set(this, 20);
         }
         return TypedActionResult.success(stack, world.isClient);
     }

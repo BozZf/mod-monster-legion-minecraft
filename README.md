@@ -16,6 +16,11 @@ Mod para **Minecraft Java 1.21.1**, **Fabric** e **Java 21**: monstros que se or
 - Animações de repouso, voo, invocação, comando, ataque, dano e morte.
 - Sons e partículas sincronizados com os eventos das animações.
 - Glowmasks dos dois modelos, ativadas por padrão e configuráveis no cliente.
+- 200 pontos de vida, defesa adaptada do dragão e queimadura ao sol.
+- Invocação de mobs com armadura aleatória, caveira sem explosão e comando de foco em jogador.
+- Caveira aplica Wither/Fome por 10 s e alimenta cura gradual; morte concede 10 ossos, 12.000 XP e 25% de chance de staff.
+- Staff invoca um aliado por jogador durante cinco minutos, com reserva persistida.
+- Veja [o combate e as regras da staff](docs/lich-combat.md).
 - Ovo de invocação e comando de prévia `/monsterlegion animate`.
 
 ## O que já existe
@@ -42,7 +47,7 @@ Instale um JDK 21, clone este repositório e abra a pasta como projeto Gradle na
 .\gradlew.bat runClient
 ```
 
-O JAR instalável fica em `build/libs/monster-legion-0.3.0-dev.jar`. Para jogar fora da IDE, instale Fabric Loader, Fabric API e GeckoLib 4.7.6 para 1.21.1 e coloque o JAR em `mods/`. O mod precisa estar no cliente e no servidor. O workflow também disponibiliza os JARs na seção Actions.
+O JAR instalável fica em `build/libs/monster-legion-0.4.0-dev.jar`. Para jogar fora da IDE, instale Fabric Loader, Fabric API e GeckoLib 4.7.6 para 1.21.1 e coloque o JAR em `mods/`. O mod precisa estar no cliente e no servidor. O workflow também disponibiliza os JARs na seção Actions.
 
 ## Testar a liderança provisória
 

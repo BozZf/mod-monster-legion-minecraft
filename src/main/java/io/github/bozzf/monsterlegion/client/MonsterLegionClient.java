@@ -7,7 +7,7 @@ import io.github.bozzf.monsterlegion.registry.ModContent;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-import net.minecraft.client.render.entity.FlyingItemEntityRenderer;
+import net.minecraft.client.render.entity.WitherSkullEntityRenderer;
 import net.minecraft.particle.SimpleParticleType;
 import net.minecraft.registry.Registries;
 import net.minecraft.sound.SoundCategory;
@@ -18,7 +18,7 @@ public final class MonsterLegionClient implements ClientModInitializer {
     @Override public void onInitializeClient() {
         CONFIG = VisualConfig.load();
         EntityRendererRegistry.register(ModContent.LICH_KING, LichKingRenderer::new);
-        EntityRendererRegistry.register(ModContent.LICH_BOLT, FlyingItemEntityRenderer::new);
+        EntityRendererRegistry.register(ModContent.LICH_BOLT, WitherSkullEntityRenderer::new);
         LichStaffRenderer staff = new LichStaffRenderer();
         BuiltinItemRendererRegistry.INSTANCE.register(ModContent.LICH_STAFF, staff::render);
         LichEffects.handler = new LichEffects.Handler() {

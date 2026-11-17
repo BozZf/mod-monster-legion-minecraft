@@ -1,6 +1,22 @@
 package io.github.bozzf.monsterlegion.entity;
 
 import io.github.bozzf.monsterlegion.legion.LegionManager;
+import io.github.bozzf.monsterlegion.combat.HealingBudget;
+import io.github.bozzf.monsterlegion.combat.LichRules;
+import io.github.bozzf.monsterlegion.combat.LichAllies;
+import io.github.bozzf.monsterlegion.combat.Summoning;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.damage.DamageTypes;
+import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.util.math.Vec3d;
 import io.github.bozzf.monsterlegion.registry.ModContent;
 import java.util.EnumSet;
 import net.minecraft.entity.EntityType;
@@ -33,6 +49,7 @@ public final class LichKingEntity extends HostileEntity implements GeoEntity {
     private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle_float");
     private static final RawAnimation FLY = RawAnimation.begin().thenLoop("fly_move");
     private static final RawAnimation DEATH = RawAnimation.begin().thenPlayAndHold("animationdeath");
+    private final HealingBudget healing = new HealingBudget();
     private int castingTicks;
     private int spellCooldown = 40;
     private int summonCooldown;
@@ -45,15 +62,17 @@ public final class LichKingEntity extends HostileEntity implements GeoEntity {
         moveControl = new FlightMoveControl(this, 20, true);
         setNoGravity(true);
         addCommandTag(LegionManager.LEADER_TAG);
-        experiencePoints = 30;
+        experiencePoints = LichRules.XP;
     }
     public static DefaultAttributeContainer.Builder attributes() {
         return HostileEntity.createHostileAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, 120)
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, LichRules.HEALTH)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.23)
                 .add(EntityAttributes.GENERIC_FLYING_SPEED, 0.3)
                 .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 32)
-                .add(EntityAttributes.GENERIC_ARMOR, 6);
+                .add(EntityAttributes.GENERIC_ARMOR, 0)
+                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, 0)
+                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 1);
     }
     @Override protected EntityNavigation createNavigation(World world) {
         return new BirdNavigation(this, world);
@@ -71,6 +90,9 @@ public final class LichKingEntity extends HostileEntity implements GeoEntity {
     @Override public void tick() {
         super.tick();
         if (getWorld().isClient || !isAlive()) return;
+        if (isAffectedByDaylight()) setOnFireFor(8);
+        heal(healing.tick());
+        if (age % 20 == 0) LichAllies.recruitNearby(this);
         if (previewTicks > 0 && --previewTicks == 0) stopTriggeredAnim("main", null);
         if (summonCooldown > 0) summonCooldown--;
         if (commandCooldown > 0) commandCooldown--;
@@ -79,6 +101,7 @@ public final class LichKingEntity extends HostileEntity implements GeoEntity {
             castingTicks--;
             if (castingTicks == 24 && spell.equals("attack_magic")) shoot();
             if (castingTicks == 24 && spell.equals("sumon")) summonGuards();
+            if (castingTicks == 16 && spell.equals("command")) commandArmy();
         }
     }
     private void beginSpell(String name, int duration) {
@@ -98,15 +121,58 @@ public final class LichKingEntity extends HostileEntity implements GeoEntity {
                 target.getZ() - bolt.getZ(), 1.1F, 0.5F);
         getWorld().spawnEntity(bolt);
     }
-    private void summonGuards() {
+    private void summonGuards() { Summoning.byLich(this); }
+    private void commandArmy() {
         if (!(getWorld() instanceof net.minecraft.server.world.ServerWorld world)) return;
-        for (int side : new int[]{-1, 1}) {
-            ZombieEntity guard = EntityType.ZOMBIE.create(world);
-            if (guard == null) continue;
-            guard.refreshPositionAndAngles(getX() + side * 2, getY(), getZ() + 2, getYaw(), 0);
-            if (!world.isSpaceEmpty(guard) || !LegionManager.tryRecruit(this, guard)) continue;
-            guard.setTarget(getTarget());
-            world.spawnEntity(guard);
+        var players = world.getPlayers().stream()
+                .filter(player -> player.isAlive() && !player.isCreative() && !player.isSpectator()
+                        && squaredDistanceTo(player) <= LichRules.ALLY_RADIUS * LichRules.ALLY_RADIUS).toList();
+        if (players.isEmpty()) return;
+        PlayerEntity chosen = players.get(random.nextInt(players.size()));
+        setTarget(chosen);
+        LichAllies.recruitNearby(this);
+        for (net.minecraft.entity.mob.MobEntity member : world.getEntitiesByClass(
+                net.minecraft.entity.mob.MobEntity.class, getBoundingBox().expand(LichRules.ALLY_RADIUS),
+                mob -> LichAllies.leader(mob) == this && squaredDistanceTo(mob) <= LichRules.ALLY_RADIUS * LichRules.ALLY_RADIUS)) {
+            member.setTarget(chosen);
+        }
+    }
+    public void healFromHit(float damage) { if (isAlive()) healing.add(damage); }
+    @Override protected int getXpToDrop() { return LichRules.XP; }
+    @Override protected boolean shouldAlwaysDropXp() { return true; }
+    @Override protected void dropLoot(DamageSource source, boolean causedByPlayer) {
+        dropStack(new ItemStack(Items.BONE, 10));
+        if (random.nextFloat() < LichRules.STAFF_CHANCE) dropStack(new ItemStack(ModContent.LICH_STAFF));
+    }
+    @Override public boolean canHaveStatusEffect(StatusEffectInstance effect) { return false; }
+
+    @Override public void writeCustomDataToNbt(NbtCompound nbt) {
+        super.writeCustomDataToNbt(nbt);
+        NbtList windows = new NbtList();
+        for (var window : healing.snapshot()) {
+            NbtCompound entry = new NbtCompound();
+            entry.putFloat("Amount", window.remaining());
+            entry.putInt("Ticks", window.ticks());
+            windows.add(entry);
+        }
+        nbt.put("LichHealing", windows);
+        nbt.putInt("LichCombatVersion", 1);
+    }
+    @Override public void readCustomDataFromNbt(NbtCompound nbt) {
+        super.readCustomDataFromNbt(nbt);
+        if (nbt.getInt("LichCombatVersion") < 1) {
+            float ratio = getMaxHealth() > 0 ? getHealth() / getMaxHealth() : 1;
+            getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(LichRules.HEALTH);
+            getAttributeInstance(EntityAttributes.GENERIC_ARMOR).setBaseValue(0);
+            getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS).setBaseValue(0);
+            getAttributeInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE).setBaseValue(1);
+            setHealth(ratio * getMaxHealth());
+        }
+        healing.clear();
+        NbtList windows = nbt.getList("LichHealing", NbtElement.COMPOUND_TYPE);
+        for (int i = 0; i < windows.size(); i++) {
+            var entry = windows.getCompound(i);
+            healing.restore(entry.getFloat("Amount"), entry.getInt("Ticks"));
         }
     }
     public void previewAnimation(String name) {
@@ -116,15 +182,37 @@ public final class LichKingEntity extends HostileEntity implements GeoEntity {
         previewTicks = 60;
     }
     @Override public boolean damage(DamageSource source, float amount) {
+        if (isInvulnerableTo(source)) return false;
+        boolean bypass = source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY);
+        boolean fire = source.isOf(DamageTypes.ON_FIRE) || source.isOf(DamageTypes.IN_FIRE)
+                || source.isOf(DamageTypes.LAVA);
+        if (!bypass && !fire) {
+            if (!(source.getAttacker() instanceof PlayerEntity)
+                    && !source.isIn(DamageTypeTags.ALWAYS_HURTS_ENDER_DRAGONS)) return false;
+            if (!headHit(source)) amount = LichRules.dragonBodyDamage(amount);
+        }
         boolean damaged = super.damage(source, amount);
         if (damaged && !getWorld().isClient && isAlive() && castingTicks == 0 && hurtTime == 10) {
             triggerAnim("main", "hurt");
         }
         return damaged;
     }
+    private boolean headHit(DamageSource source) {
+        Entity direct = source.getSource();
+        if (direct instanceof ProjectileEntity) return direct.getY() >= getY() + 2.7;
+        if (source.getAttacker() instanceof LivingEntity attacker) {
+            Vec3d eye = attacker.getEyePos();
+            Vec3d end = eye.add(attacker.getRotationVec(1).multiply(6));
+            return getBoundingBox().raycast(eye, end).map(pos -> pos.y >= getY() + 2.7).orElse(false);
+        }
+        return false;
+    }
     @Override public void onDeath(DamageSource source) {
         super.onDeath(source);
-        if (!getWorld().isClient) stopTriggeredAnim("main", null);
+        if (!getWorld().isClient) {
+            stopTriggeredAnim("main", null);
+            LichAllies.release(this);
+        }
     }
     @Override protected SoundEvent getHurtSound(DamageSource source) { return null; }
     @Override protected SoundEvent getDeathSound() { return null; }

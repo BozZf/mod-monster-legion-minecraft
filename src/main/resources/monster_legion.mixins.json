@@ -4,7 +4,9 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "MobEntityAccessor",
-    "CommanderMobMixin"
+    "CommanderMobMixin",
+    "SummonedMobMixin",
+    "SummonedLootMixin"
   ],
   "injectors": {
     "defaultRequire": 1

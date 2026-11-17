@@ -10,7 +10,7 @@ O comandante conserva os atributos normais da espécie, acrescidos dos efeitos r
 
 ## Liderança
 
-Os seguidores ficam associados ao UUID do grupo através de tags salvas na entidade. Depois de recarregar chunks ou o mundo, o sistema refaz a associação de navegação sem misturar patrulhas próximas. O Rei Lich também não rouba membros dessas patrulhas.
+Os seguidores ficam associados ao UUID do grupo através de tags salvas na entidade. Depois de recarregar chunks ou o mundo, o sistema refaz a associação de navegação sem misturar patrulhas próximas. O Rei Lich pode converter monstros próximos em aliados por sua aura. Esse vínculo tem prioridade sobre a patrulha enquanto o Lich estiver próximo, preservando equipamento e XP do comandante; veja as regras de combate do Lich.
 
 Seguidores ociosos acompanham o comandante. Enquanto vinculados a ele, uma meta de alvo com prioridade máxima faz com que usem o alvo atual do comandante, à frente das metas vanilla de caça e retaliação. Se o comandante não tem alvo válido, aguardam sua ordem. Após a morte dele ou perda do vínculo por distância/descarregamento, voltam à IA comum.
 

@@ -21,7 +21,9 @@ public abstract class CommanderMobMixin {
 
     @Inject(method = "getXpToDrop", at = @At("HEAD"), cancellable = true)
     private void monsterLegion$commanderXp(CallbackInfoReturnable<Integer> cir) {
-        if (PatrolIdentity.isCommander((MobEntity) (Object) this)) {
+        if (((io.github.bozzf.monsterlegion.combat.SummonData) this).monsterLegion$conjured()) {
+            cir.setReturnValue(0);
+        } else if (PatrolIdentity.isCommander((MobEntity) (Object) this)) {
             // Use species base XP; vanilla would add a random bonus for all five equipped items.
             cir.setReturnValue(PatrolRules.commanderXp(experiencePoints));
         }
@@ -30,11 +32,12 @@ public abstract class CommanderMobMixin {
             at = @At("HEAD"), cancellable = true)
     private void monsterLegion$noCommanderEquipment(ServerWorld world, DamageSource source,
             boolean causedByPlayer, CallbackInfo ci) {
-        if (PatrolIdentity.isCommander((MobEntity) (Object) this)) ci.cancel();
+        if (PatrolIdentity.isCommander((MobEntity) (Object) this)
+                || ((io.github.bozzf.monsterlegion.combat.SummonData) this).monsterLegion$conjured()) ci.cancel();
     }
     @Inject(method = "setTarget", at = @At("HEAD"), cancellable = true)
     private void monsterLegion$noPatrolInfighting(LivingEntity target, CallbackInfo ci) {
-        if (target != null && PatrolIdentity.sameGroup((MobEntity) (Object) this, target)) ci.cancel();
+        if (target != null && io.github.bozzf.monsterlegion.combat.LichAllies.allied((MobEntity) (Object) this, target)) ci.cancel();
     }
     @Inject(method = "convertTo", at = @At("RETURN"))
     private <T extends MobEntity> void monsterLegion$keepCommanderIdentity(EntityType<T> type,
