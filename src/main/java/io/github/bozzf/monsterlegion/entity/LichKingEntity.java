@@ -88,7 +88,7 @@ public final class LichKingEntity extends HostileEntity implements GeoEntity {
         goalSelector.add(1, new SpellGoal());
         goalSelector.add(7, new LookAtEntityGoal(this, PlayerEntity.class, 12));
         goalSelector.add(8, new LookAroundGoal(this));
-        targetSelector.add(1, new RevengeGoal(this));
+        targetSelector.add(1, new RevengeGoal(this).setMaxTimeWithoutVisibility(400));
         targetSelector.add(2, new ActiveTargetGoal<>(this, PlayerEntity.class, true).setMaxTimeWithoutVisibility(400));
     }
     @Override public boolean canTarget(LivingEntity target) {
