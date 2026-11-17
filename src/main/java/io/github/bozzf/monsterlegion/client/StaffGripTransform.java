@@ -8,7 +8,7 @@ public final class StaffGripTransform {
         // Apply the supplied pose in this exact order, inside the renderer's push/pop.
         matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(67));
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90));
-        matrices.translate(0, 0.5, 0);
+        matrices.translate(0, -15.0, 0);
     }
     private StaffGripTransform() { }
 }
