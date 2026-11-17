@@ -6,10 +6,12 @@
     "MobEntityAccessor",
     "CommanderMobMixin",
     "SummonedMobMixin",
-    "SummonedLootMixin",
-    "SummonedFireMixin"
+    "SummonedLootMixin"
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "client": [
+    "StaffAttackMixin"
+  ]
 }

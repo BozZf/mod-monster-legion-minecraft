@@ -8,6 +8,12 @@ Como referência de defesa, ataques de jogadores, golems, criaturas de grupos n�
 
 Entidades antigas da versão anterior são migradas para os novos atributos ao carregar, mantendo a proporção da vida restante.
 
+## Voo e perseguição
+
+O Lich flutua, amortece a descida e sobe quando precisa alcançar a altura de um alvo visível, com comportamento inspirado no Blaze. Seu caminho usa navegação aérea. Quando perde a visão do jogador, conserva o alvo por até 20 segundos dentro do alcance e procura posições nas laterais e em três alturas acima dele. Escolhe um ponto com espaço para seu corpo, linha de visão e caminho alcançável; se não acha, tenta uma subida curta ou aproximação por navegação.
+
+A busca é refeita a cada segundo. Não teleporta o Lich, não quebra blocos, não abre portas fechadas e não permite atravessar paredes/tetos. Um jogador inteiramente fechado em blocos pode continuar sem linha de visão. Os cooldowns e os momentos de disparo continuam iguais; não dispara caveiras através de obstáculos.
+
 ## Magias
 
 ### summon
@@ -61,7 +67,13 @@ Botão direito invoca **um** monstro e um conjunto de armadura dos mesmos sortei
 - Transformações vanilla transferem a identidade e mantêm o prazo original.
 - Se não há posição segura, não se ocupa uma vaga nem se cria um mob preso em blocos.
 - Invocações conjuradas pelo Lich ou pela staff não produzem loot, equipamento ou XP, evitando farm de armaduras aleatórias.
-- Todos os mortos-vivos conjurados queimam com exposição ao sol, inclusive de capacete e incluindo o esqueleto Wither invocado. Sombra e água/chuva continuam protegendo conforme a verificação de exposição vanilla. A imunidade nativa a fogo é removida somente dos mobs conjurados; espécies naturais não são alteradas.
+- Invocados seguem o comportamento solar vanilla: capacetes protegem as espécies aplicáveis e podem sofrer desgaste normal; sem proteção zumbis/esqueletos voltam a queimar. Husk e esqueleto Wither preservam suas imunidades naturais. Não há mais a queimadura forçada nem remoção de imunidade de fogo introduzida na 0.4.3.
+
+### Botão esquerdo: encerrar invocação
+
+Com a staff na **mão principal**, o botão esquerdo encerra a sua invocação ativa, apontando para ar, bloco ou criatura. A pancada normal e a mineração com a staff são canceladas. Não afeta invocações de outros jogadores nem do Lich. Se não há invocação ativa, apenas informa isso, sem bater.
+
+A morte usa o caminho normal de dano letal, sem loot/XP, liberando a vaga imediatamente. Se o mob estiver descarregado, o cancelamento é salvo pelo UUID dele e ele morre ao carregar. Isso não impede uma nova invocação com outro UUID enquanto o corpo anterior aguarda remoção. Há validação no servidor de quem enviou a ação e de que está segurando a staff; o pacote não aceita um UUID de alvo informado pelo cliente. Cliente e servidor devem usar a mesma versão atualizada para o clique no ar funcionar.
 
 A staff deixa de atirar o projétil provisório da versão anterior; sua magia de uso agora é summon. A animação original de rotação da joia permanece.
 
@@ -77,6 +89,6 @@ O ovo tem entrada própria na aba de ovos do criativo. A staff aparece nas abas 
 
 Ao testar a expiração, observar o som/animação de morte, a permanência breve do corpo e ausência de qualquer item ou XP. A vaga é liberada quando o invocado morre, sem esperar a remoção do corpo. A proteção de drops vale tanto para invocados do Lich quanto para os do jogador, inclusive mortes em combate e com Saque.
 
-Conferir no jogo: dano de golem/pets/invocados do jogador, sol com e sem capacete (inclusive esqueleto Wither), teleporte ao afastar 12 blocos sem reiniciar prazo, novo encaixe `staff_anchor`, rotação adicional de 180°, cooldowns de 60/10 segundos, morte dos invocados junto ao Lich (incluindo recarga de chunks), sorteio de mobs/armaduras, colisão da caveira sem explosão, efeitos por 10 s, cura gradual no Lich, foco aleatório com dois jogadores, queimadura ao sol, loot em múltiplas mortes e vida/XP. Para a staff, conferir morte, cinco minutos, dois cajados, dois jogadores, troca de dimensão, transformação do mob e save/reload com o invocado descarregado.
+Conferir no jogo: dano de golem/pets/invocados do jogador, sol vanilla com e sem capacete (preservando imunidade do esqueleto Wither), teleporte ao afastar 12 blocos sem reiniciar prazo, novo encaixe `staff_anchor`, rotação adicional de 180°, cooldowns de 60/10 segundos, morte dos invocados junto ao Lich (incluindo recarga de chunks), sorteio de mobs/armaduras, colisão da caveira sem explosão, efeitos por 10 s, cura gradual no Lich, foco aleatório com dois jogadores, queimadura ao sol, loot em múltiplas mortes e vida/XP. Para a staff, conferir clique esquerdo no ar/bloco/entidade, ausência de dano/mineração, cancelamento de invocação descarregada, morte, cinco minutos, dois cajados, dois jogadores, troca de dimensão, transformação do mob e save/reload com o invocado descarregado.
 
 Os testes automatizados cobrem os números de combate, orçamento/duração/persistência da cura e exclusividade/transferência da reserva de invocação. O workflow compila o mod e verifica carregamento em servidor dedicado; a observação da luta dentro do jogo permanece necessária.

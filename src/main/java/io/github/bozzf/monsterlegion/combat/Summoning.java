@@ -119,6 +119,17 @@ public final class Summoning {
         world.spawnParticles(ParticleTypes.ENCHANT, mob.getX(), mob.getBodyY(0.5), mob.getZ(), 30, 0.5, 0.8, 0.5, 0.1);
         return null;
     }
+    public static boolean dismiss(ServerPlayerEntity player) {
+        MinecraftServer server = player.getServer();
+        StaffSummonState state = StaffSummonState.get(server);
+        SummonSlots.Slot slot = state.slots.get(player.getUuid());
+        if (slot == null) return false;
+        state.cancel(slot.entity());
+        state.slots.remove(player.getUuid(), slot.entity());
+        state.markDirty();
+        expire(server, slot.entity());
+        return true;
+    }
     private static void expire(MinecraftServer server, java.util.UUID uuid) {
         for (ServerWorld world : server.getWorlds()) {
             Entity entity = world.getEntity(uuid);
@@ -140,7 +151,8 @@ public final class Summoning {
             return;
         }
         if (data.monsterLegion$playerOwner() == null) return;
-        if (data.monsterLegion$expiresAt() <= now(world.getServer())) {
+        if (data.monsterLegion$expiresAt() <= now(world.getServer())
+                || StaffSummonState.get(world.getServer()).isCancelled(mob.getUuid())) {
             expire(mob);
             return;
         }

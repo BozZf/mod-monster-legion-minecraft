@@ -17,11 +17,12 @@ Mod para **Minecraft Java 1.21.1**, **Fabric** e **Java 21**: monstros que se or
 - Sons e partículas sincronizados com os eventos das animações.
 - Glowmasks dos dois modelos, ativadas por padrão e configuráveis no cliente.
 - 200 pontos de vida, defesa adaptada do dragão, dano de golems/criaturas amigas e queimadura ao sol.
+- Voo com flutuação e busca de linha de visão: reposiciona-se por cima/lados quando o jogador se esconde.
 - Invocação de 2 a 4 mobs por conjuração (cooldown de 60 s), caveira sem explosão (cooldown de 10 s) e comando de foco em jogador.
 - Invocados do Lich sem prazo de cinco minutos; morrem com seu dono, mantendo o vínculo após descarregar chunks.
 - Caveira aplica Wither/Fome por 10 s e alimenta cura gradual; morte concede 10 ossos, 12.000 XP e 25% de chance de staff.
-- Invocações queimam ao sol mesmo com capacete. A do jogador retorna por teleporte ao se afastar 12 blocos, quando há chão seguro na mesma dimensão.
-- Staff nas abas Ferramentas e utilidades e Combate do criativo. Invoca sem som um aliado por jogador durante cinco minutos, com reserva persistida; ao expirar ele morre sem drops nem XP.
+- Invocações seguem o sol vanilla: capacetes protegem quando aplicável e espécies imunes continuam imunes. A do jogador retorna por teleporte ao se afastar 12 blocos, quando há chão seguro na mesma dimensão.
+- Staff nas abas Ferramentas e utilidades e Combate do criativo. Botão direito invoca sem som um aliado por jogador durante cinco minutos; botão esquerdo cancela/mata sua invocação sem pancada normal, com reserva persistida; ao expirar ele morre sem drops nem XP.
 - Veja [o combate e as regras da staff](docs/lich-combat.md).
 - Ovo de invocação e comando de prévia `/monsterlegion animate`.
 
@@ -49,7 +50,7 @@ Instale um JDK 21, clone este repositório e abra a pasta como projeto Gradle na
 .\gradlew.bat runClient
 ```
 
-O JAR instalável fica em `build/libs/monster-legion-0.4.3-dev.jar`. Para jogar fora da IDE, instale Fabric Loader, Fabric API e GeckoLib 4.7.6 para 1.21.1 e coloque o JAR em `mods/`. O mod precisa estar no cliente e no servidor. O workflow também disponibiliza os JARs na seção Actions.
+O JAR instalável fica em `build/libs/monster-legion-0.4.4-dev.jar`. Para jogar fora da IDE, instale Fabric Loader, Fabric API e GeckoLib 4.7.6 para 1.21.1 e coloque o JAR em `mods/`. O mod precisa estar no cliente e no servidor. O workflow também disponibiliza os JARs na seção Actions.
 
 ## Testar a liderança provisória
 

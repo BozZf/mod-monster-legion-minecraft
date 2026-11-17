@@ -40,12 +40,6 @@ public abstract class SummonedMobMixin implements SummonData {
     private void monsterLegion$trackConjured(DataTracker.Builder builder, CallbackInfo ci) {
         builder.add(monsterLegion$CONJURED, false);
     }
-    @Inject(method = "tick", at = @At("TAIL"))
-    private void monsterLegion$burnInSunlight(CallbackInfo ci) {
-        MobEntity mob = (MobEntity) (Object) this;
-        if (monsterLegion$conjured() && !mob.getWorld().isClient && mob.isAlive()
-                && ((MobEntityAccessor) mob).monsterLegion$isAffectedByDaylight()) mob.setOnFireFor(8);
-    }
     @Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
     private void monsterLegion$save(NbtCompound nbt, CallbackInfo ci) {
         NbtCompound data = new NbtCompound();

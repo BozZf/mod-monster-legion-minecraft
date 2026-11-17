@@ -12,6 +12,11 @@ public final class StaffSummonState extends PersistentState {
             new Type<>(StaffSummonState::new, StaffSummonState::read, null);
     public final SummonSlots slots = new SummonSlots();
     private final java.util.Set<java.util.UUID> deadLiches = new java.util.HashSet<>();
+    private final java.util.Set<java.util.UUID> cancelledSummons = new java.util.HashSet<>();
+    public boolean isCancelled(java.util.UUID summon) { return cancelledSummons.contains(summon); }
+    public void cancel(java.util.UUID summon) {
+        if (cancelledSummons.add(summon)) markDirty();
+    }
     public boolean isLichDead(java.util.UUID lich) { return deadLiches.contains(lich); }
     public void markLichDead(java.util.UUID lich) {
         if (deadLiches.add(lich)) markDirty();
@@ -32,6 +37,11 @@ public final class StaffSummonState extends PersistentState {
             NbtCompound entry = deaths.getCompound(i);
             if (entry.containsUuid("Lich")) state.deadLiches.add(entry.getUuid("Lich"));
         }
+        NbtList cancelled = nbt.getList("CancelledSummons", NbtElement.COMPOUND_TYPE);
+        for (int i = 0; i < cancelled.size(); i++) {
+            NbtCompound entry = cancelled.getCompound(i);
+            if (entry.containsUuid("Entity")) state.cancelledSummons.add(entry.getUuid("Entity"));
+        }
         return state;
     }
     @Override public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
@@ -51,6 +61,13 @@ public final class StaffSummonState extends PersistentState {
             deaths.add(entry);
         }
         nbt.put("DeadLiches", deaths);
+        NbtList cancelled = new NbtList();
+        for (java.util.UUID summon : cancelledSummons) {
+            NbtCompound entry = new NbtCompound();
+            entry.putUuid("Entity", summon);
+            cancelled.add(entry);
+        }
+        nbt.put("CancelledSummons", cancelled);
         return nbt;
     }
 }

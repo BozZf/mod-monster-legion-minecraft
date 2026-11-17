@@ -79,3 +79,7 @@ O renderer aplica **180° adicionais** em Y sobre a correção anterior de 90° 
 ### Empunhadura inclinada (0.4.3)
 
 A pose local da staff agora aplica yaw de -90°, inclinação de **60° em Z** e um deslocamento de **+0,5 bloco** ao longo da haste em relação ao alinhamento anterior. Isso move a empunhadura do pixel 28 para o pixel 20 do modelo da staff, afastando o cristal da mão e inclinando a ponta para o lado. A rotação geral do Lich, que já estava correta, não foi alterada. O teste geométrico verifica o ponto de empunhadura no anchor; ainda é necessário conferir a aparência com animações no jogo.
+
+### Voo e controles (0.4.4)
+
+A orientação e o encaixe do modelo foram mantidos. O Lich agora procura um ponto de visão pelo ar ao perder o jogador; use uma parede baixa, uma coluna e uma cobertura para conferir a perseguição. Para a staff, botão direito invoca e botão esquerdo encerra a invocação; testar mirando ar, bloco e criatura. A proteção solar dos capacetes voltou ao vanilla.

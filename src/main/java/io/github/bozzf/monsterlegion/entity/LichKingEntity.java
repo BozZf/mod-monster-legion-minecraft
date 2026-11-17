@@ -50,6 +50,8 @@ public final class LichKingEntity extends HostileEntity implements GeoEntity {
     private static final RawAnimation FLY = RawAnimation.begin().thenLoop("fly_move");
     private static final RawAnimation DEATH = RawAnimation.begin().thenPlayAndHold("animationdeath");
     private final HealingBudget healing = new HealingBudget();
+    private final io.github.bozzf.monsterlegion.combat.LichFlightSearch flightSearch =
+            new io.github.bozzf.monsterlegion.combat.LichFlightSearch();
     private int castingTicks;
     private int spellCooldown = 40;
     private final io.github.bozzf.monsterlegion.combat.LichSpellCooldowns abilityCooldowns =
@@ -77,14 +79,17 @@ public final class LichKingEntity extends HostileEntity implements GeoEntity {
                 .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 1);
     }
     @Override protected EntityNavigation createNavigation(World world) {
-        return new BirdNavigation(this, world);
+        BirdNavigation navigation = new BirdNavigation(this, world);
+        navigation.setCanEnterOpenDoors(true);
+        navigation.setCanPathThroughDoors(false);
+        return navigation;
     }
     @Override protected void initGoals() {
         goalSelector.add(1, new SpellGoal());
         goalSelector.add(7, new LookAtEntityGoal(this, PlayerEntity.class, 12));
         goalSelector.add(8, new LookAroundGoal(this));
         targetSelector.add(1, new RevengeGoal(this));
-        targetSelector.add(2, new ActiveTargetGoal<>(this, PlayerEntity.class, true));
+        targetSelector.add(2, new ActiveTargetGoal<>(this, PlayerEntity.class, true).setMaxTimeWithoutVisibility(400));
     }
     @Override public boolean canTarget(LivingEntity target) {
         return !LegionManager.isLegionMember(this, target) && super.canTarget(target);
@@ -93,6 +98,13 @@ public final class LichKingEntity extends HostileEntity implements GeoEntity {
         super.tick();
         if (getWorld().isClient || !isAlive()) return;
         if (isAffectedByDaylight()) setOnFireFor(8);
+        if (!isOnGround() && getVelocity().y < 0) setVelocity(getVelocity().multiply(1, 0.6, 1));
+        LivingEntity target = getTarget();
+        if (castingTicks == 0 && target != null && target.isAlive() && canSee(target)
+                && target.getEyeY() > getEyeY() + 1) {
+            Vec3d velocity = getVelocity();
+            setVelocity(velocity.x, velocity.y + (0.3 - velocity.y) * 0.3, velocity.z);
+        }
         heal(healing.tick());
         if (age % 20 == 0) LichAllies.recruitNearby(this);
         if (previewTicks > 0 && --previewTicks == 0) stopTriggeredAnim("main", null);
@@ -251,14 +263,15 @@ public final class LichKingEntity extends HostileEntity implements GeoEntity {
         SpellGoal() { setControls(EnumSet.of(Control.MOVE, Control.LOOK)); }
         @Override public boolean canStart() { return getTarget() != null && getTarget().isAlive(); }
         @Override public boolean shouldContinue() { return canStart(); }
-        @Override public void stop() { getNavigation().stop(); }
+        @Override public void stop() { getNavigation().stop(); flightSearch.reset(); }
         @Override public void tick() {
             LivingEntity target = getTarget();
             if (target == null || !canTarget(target)) { setTarget(null); return; }
             getLookControl().lookAt(target, 20, 20);
             if (castingTicks > 0) return;
-            if (squaredDistanceTo(target) > 144 || !canSee(target)) {
-                getNavigation().startMovingTo(target.getX(), target.getY() + 1, target.getZ(), 1.0);
+            boolean visible = canSee(target);
+            if (squaredDistanceTo(target) > 144 || !visible) {
+                flightSearch.pursue(LichKingEntity.this, target, visible);
             } else {
                 getNavigation().stop();
                 if (spellCooldown > 0) return;

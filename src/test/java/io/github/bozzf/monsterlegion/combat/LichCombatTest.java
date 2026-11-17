@@ -99,4 +99,22 @@ class LichCombatTest {
         assertFalse(LichDamageRules.friendlyGroup(net.minecraft.entity.SpawnGroup.MONSTER));
     }
 
+    @Test void cancelledSummonPersistsWithoutCancellingOtherPlayersOrNewSummons() {
+        StaffSummonState state = new StaffSummonState();
+        UUID owner = UUID.randomUUID(), otherOwner = UUID.randomUUID();
+        UUID old = UUID.randomUUID(), other = UUID.randomUUID(), replacement = UUID.randomUUID();
+        state.slots.reserve(owner, old, 6000);
+        state.slots.reserve(otherOwner, other, 6000);
+        state.cancel(old);
+        state.slots.remove(owner, old);
+        assertTrue(state.slots.reserve(owner, replacement, 6100));
+        var restored = StaffSummonState.read(state.writeNbt(new net.minecraft.nbt.NbtCompound(), null), null);
+        assertTrue(restored.isCancelled(old));
+        assertFalse(restored.isCancelled(other));
+        assertFalse(restored.isCancelled(replacement));
+        assertEquals(other, restored.slots.get(otherOwner).entity());
+        assertEquals(replacement, restored.slots.get(owner).entity());
+        assertFalse(StaffSummonState.read(new net.minecraft.nbt.NbtCompound(), null).isCancelled(old));
+    }
+
 }

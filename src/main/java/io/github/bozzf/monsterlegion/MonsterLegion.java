@@ -19,6 +19,7 @@ public final class MonsterLegion implements ModInitializer {
     public void onInitialize() {
         io.github.bozzf.monsterlegion.registry.ModContent.initialize();
         io.github.bozzf.monsterlegion.command.LichCommands.initialize();
+        io.github.bozzf.monsterlegion.combat.StaffControls.initialize();
         io.github.bozzf.monsterlegion.patrol.NightPatrols.initialize();
         ServerEntityEvents.ENTITY_LOAD.register((entity, world) -> {
             if (entity instanceof net.minecraft.entity.mob.MobEntity mob) {
