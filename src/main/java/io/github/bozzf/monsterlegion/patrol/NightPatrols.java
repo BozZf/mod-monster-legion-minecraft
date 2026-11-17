@@ -23,7 +23,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.Heightmap;
-import net.minecraft.world.SpawnReason;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.world.World;
 
 public final class NightPatrols {
