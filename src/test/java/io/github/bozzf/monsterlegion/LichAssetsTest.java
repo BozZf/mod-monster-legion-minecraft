@@ -27,6 +27,16 @@ class LichAssetsTest {
             }
         }
     }
+    @Test void staffAnchorExistsOnTheAnimatedLeftArm() throws Exception {
+        var bones = json("geo/lich.geo.json").getAsJsonArray("minecraft:geometry").get(0)
+                .getAsJsonObject().getAsJsonArray("bones");
+        JsonObject anchor = null;
+        for (var bone : bones) {
+            if (bone.getAsJsonObject().get("name").getAsString().equals("staff_anchor")) anchor = bone.getAsJsonObject();
+        }
+        assertNotNull(anchor, "Updated model must retain the renderer attachment point");
+        assertEquals("braco_esquerdo", anchor.get("parent").getAsString());
+    }
     @Test void keyframesResolveToBundledSoundsAndAllowedVanillaParticles() throws Exception {
         JsonObject sounds = json("sounds.json");
         Set<String> allowed = Set.of("minecraft:sculk_soul", "minecraft:enchant", "minecraft:end_rod", "minecraft:dust_plume", "minecraft:ash");

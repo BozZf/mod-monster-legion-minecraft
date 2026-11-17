@@ -52,7 +52,8 @@ public final class LichKingEntity extends HostileEntity implements GeoEntity {
     private final HealingBudget healing = new HealingBudget();
     private int castingTicks;
     private int spellCooldown = 40;
-    private int summonCooldown;
+    private final io.github.bozzf.monsterlegion.combat.LichSpellCooldowns abilityCooldowns =
+            new io.github.bozzf.monsterlegion.combat.LichSpellCooldowns();
     private int commandCooldown = 160;
     private int previewTicks;
     private String spell = "";
@@ -94,7 +95,7 @@ public final class LichKingEntity extends HostileEntity implements GeoEntity {
         heal(healing.tick());
         if (age % 20 == 0) LichAllies.recruitNearby(this);
         if (previewTicks > 0 && --previewTicks == 0) stopTriggeredAnim("main", null);
-        if (summonCooldown > 0) summonCooldown--;
+        abilityCooldowns.tick();
         if (commandCooldown > 0) commandCooldown--;
         if (spellCooldown > 0) spellCooldown--;
         if (castingTicks > 0) {
@@ -106,6 +107,7 @@ public final class LichKingEntity extends HostileEntity implements GeoEntity {
     }
     private void beginSpell(String name, int duration) {
         spell = name;
+        abilityCooldowns.cast(name);
         castingTicks = duration;
         spellCooldown = duration + 20;
         getNavigation().stop();
@@ -157,6 +159,8 @@ public final class LichKingEntity extends HostileEntity implements GeoEntity {
         }
         nbt.put("LichHealing", windows);
         nbt.putInt("LichCombatVersion", 1);
+        nbt.putInt("LichSummonCooldown", abilityCooldowns.summonRemaining());
+        nbt.putInt("LichMagicCooldown", abilityCooldowns.magicRemaining());
     }
     @Override public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
@@ -168,6 +172,7 @@ public final class LichKingEntity extends HostileEntity implements GeoEntity {
             getAttributeInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE).setBaseValue(1);
             setHealth(ratio * getMaxHealth());
         }
+        abilityCooldowns.restore(nbt.getInt("LichSummonCooldown"), nbt.getInt("LichMagicCooldown"));
         healing.clear();
         NbtList windows = nbt.getList("LichHealing", NbtElement.COMPOUND_TYPE);
         for (int i = 0; i < windows.size(); i++) {
@@ -211,6 +216,7 @@ public final class LichKingEntity extends HostileEntity implements GeoEntity {
         super.onDeath(source);
         if (!getWorld().isClient) {
             stopTriggeredAnim("main", null);
+            Summoning.onLichDeath(this);
             LichAllies.release(this);
         }
     }
@@ -253,13 +259,12 @@ public final class LichKingEntity extends HostileEntity implements GeoEntity {
             } else {
                 getNavigation().stop();
                 if (spellCooldown > 0) return;
-                if (summonCooldown == 0) {
+                if (abilityCooldowns.canSummon()) {
                     beginSpell("sumon", 49);
-                    summonCooldown = 300;
                 } else if (commandCooldown == 0) {
                     beginSpell("command", 32);
                     commandCooldown = 200;
-                } else beginSpell("attack_magic", 49);
+                } else if (abilityCooldowns.canAttackMagic()) beginSpell("attack_magic", 49);
             }
         }
     }

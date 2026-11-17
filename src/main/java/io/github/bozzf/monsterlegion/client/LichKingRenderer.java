@@ -25,12 +25,13 @@ public final class LichKingRenderer extends GeoEntityRenderer<LichKingEntity> {
         addRenderLayer(new BlockAndItemGeoLayer<LichKingEntity>(this) {
             private final ItemStack staff = new ItemStack(ModContent.LICH_STAFF);
             @Override protected ItemStack getStackForBone(GeoBone bone, LichKingEntity entity) {
-                return bone.getName().equals("cajado") ? staff : null;
+                return bone.getName().equals("staff_anchor") ? staff : null;
             }
             @Override protected void renderStackForBone(MatrixStack matrices, GeoBone bone, ItemStack stack,
                     LichKingEntity entity, VertexConsumerProvider vertices, float tickDelta, int light, int overlay) {
                 matrices.push();
-                // Staff coordinates use the same 28-pixel grip height as the attachment bone.
+                // Align the standalone staff grip (0, 28, 0) to the dedicated hand anchor.
+                matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-90));
                 matrices.translate(0, -28.0 / 16.0, 0);
                 super.renderStackForBone(matrices, bone, stack, entity, vertices, tickDelta, light, overlay);
                 matrices.pop();
@@ -41,7 +42,7 @@ public final class LichKingRenderer extends GeoEntityRenderer<LichKingEntity> {
     @Override protected void applyRotations(LichKingEntity entity, MatrixStack matrices, float age,
             float bodyYaw, float tickDelta, float scale) {
         super.applyRotations(entity, matrices, age, bodyYaw, tickDelta, scale);
-        // The supplied model faces +X; Minecraft models face -Z.
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90));
+        // Keep the original 90-degree axis correction and turn the visible model another 180 degrees.
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90 + 180));
     }
 }

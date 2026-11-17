@@ -56,7 +56,7 @@ No primeiro início do cliente, o mod cria `config/monster_legion-client.json`:
 }
 ```
 
-Todas as opções começam ativadas. Edite o JSON e reinicie o cliente para aplicar. O arquivo é local a cada jogador e não altera o comportamento do combate no servidor. Ainda não há tela de configuração. O som de ativação da staff é um som de jogabilidade e não é controlado por `enableAnimationSounds`.
+Todas as opções começam ativadas. Edite o JSON e reinicie o cliente para aplicar. O arquivo é local a cada jogador e não altera o comportamento do combate no servidor. Ainda não há tela de configuração. A ativação da staff pelo jogador é silenciosa; o som de summon continua na animação do Rei Lich.
 
 As glowmasks são renderizadas com `AutoGlowingGeoLayer` no Rei Lich e na staff. O nome `_glowmask.png` é mantido ao lado da textura correspondente. Brilho emissivo deixa os pixels visíveis no escuro, sem iluminar blocos próximos.
 
@@ -66,6 +66,12 @@ As glowmasks são renderizadas com `AutoGlowingGeoLayer` no Rei Lich e na staff.
 - Recursos usados no jogo: `src/main/resources/assets/monster_legion/`.
 - Classes gráficas e registros de renderers: pacote `client`, carregado exclusivamente pelo entrypoint de cliente.
 - Comportamento e entidades: pacote `entity`.
-- A staff é renderizada no osso `cajado`, acompanhando as transformações do braço; a animação `rotação` da joia é preservada.
+- A staff é renderizada no osso `staff_anchor`, acompanhando as transformações do braço; a animação `rotação` da joia é preservada.
 
 Os testes verificam regras de associação, nomes dos ossos, recursos de áudio, sequência dos efeitos da morte e dimensões das glowmasks. Compilação não substitui a verificação dentro do jogo: conferir alinhamento da staff, orientação do modelo, UV, animações em movimento, prioridade de combate, caminhos de voo e efeitos com dois clientes. Sem chunks carregados o grupo é refeito ao retornar, como na base anterior.
+
+## Revisão do encaixe e orientação
+
+O modelo `lich.geo(2).json` substitui a geometria de execução; o original também fica em `art/leader/original/`. O ponto de encaixe agora é `staff_anchor`, filho de `braco_esquerdo`, com pivot `[0, 28, -6]`. A geometria independente da staff é alinhada pelo ponto de empunhadura e recebe uma correção local de orientação.
+
+O renderer aplica **180° adicionais** em Y sobre a correção anterior de 90° (total de 270°). A transformação é aplicada ao Lich e às suas camadas, incluindo glowmask e staff. É necessário conferir o resultado visual no jogo, pois testes de compilação não validam a aparência do encaixe.

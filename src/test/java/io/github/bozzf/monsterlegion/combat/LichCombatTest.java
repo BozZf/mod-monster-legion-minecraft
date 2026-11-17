@@ -68,6 +68,20 @@ class LichCombatTest {
         assertEquals(8234, restored.slots.get(owner).expiresAt());
         assertFalse(restored.slots.reserve(owner, UUID.randomUUID(), 15000));
     }
+    @Test void ownerDeathMarkerSurvivesReloadWithoutAffectingOtherLichesOrPlayers() {
+        StaffSummonState state = new StaffSummonState();
+        UUID lich = UUID.randomUUID(), aliveLich = UUID.randomUUID();
+        UUID player = UUID.randomUUID(), summon = UUID.randomUUID();
+        state.slots.reserve(player, summon, 12345);
+        state.markLichDead(lich);
+        var restored = StaffSummonState.read(state.writeNbt(new net.minecraft.nbt.NbtCompound(), null), null);
+        assertTrue(restored.isLichDead(lich));
+        assertFalse(restored.isLichDead(aliveLich));
+        assertEquals(summon, restored.slots.get(player).entity());
+        assertEquals(12345, restored.slots.get(player).expiresAt());
+        var legacy = StaffSummonState.read(new net.minecraft.nbt.NbtCompound(), null);
+        assertFalse(legacy.isLichDead(lich));
+    }
     @Test void conversionTransfersTheSlotWithoutResettingExpiry() {
         SummonSlots slots = new SummonSlots();
         UUID owner = UUID.randomUUID(), old = UUID.randomUUID(), converted = UUID.randomUUID();

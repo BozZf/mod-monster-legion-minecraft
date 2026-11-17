@@ -11,6 +11,11 @@ public final class StaffSummonState extends PersistentState {
     public static final Type<StaffSummonState> TYPE =
             new Type<>(StaffSummonState::new, StaffSummonState::read, null);
     public final SummonSlots slots = new SummonSlots();
+    private final java.util.Set<java.util.UUID> deadLiches = new java.util.HashSet<>();
+    public boolean isLichDead(java.util.UUID lich) { return deadLiches.contains(lich); }
+    public void markLichDead(java.util.UUID lich) {
+        if (deadLiches.add(lich)) markDirty();
+    }
     public static StaffSummonState get(MinecraftServer server) {
         return server.getOverworld().getPersistentStateManager().getOrCreate(TYPE, "monster_legion_staff_summons");
     }
@@ -21,6 +26,11 @@ public final class StaffSummonState extends PersistentState {
             NbtCompound entry = list.getCompound(i);
             if (entry.containsUuid("Owner") && entry.containsUuid("Entity"))
                 state.slots.reserve(entry.getUuid("Owner"), entry.getUuid("Entity"), entry.getLong("ExpiresAt"));
+        }
+        NbtList deaths = nbt.getList("DeadLiches", NbtElement.COMPOUND_TYPE);
+        for (int i = 0; i < deaths.size(); i++) {
+            NbtCompound entry = deaths.getCompound(i);
+            if (entry.containsUuid("Lich")) state.deadLiches.add(entry.getUuid("Lich"));
         }
         return state;
     }
@@ -34,6 +44,13 @@ public final class StaffSummonState extends PersistentState {
             list.add(entry);
         });
         nbt.put("Summons", list);
+        NbtList deaths = new NbtList();
+        for (java.util.UUID lich : deadLiches) {
+            NbtCompound entry = new NbtCompound();
+            entry.putUuid("Lich", lich);
+            deaths.add(entry);
+        }
+        nbt.put("DeadLiches", deaths);
         return nbt;
     }
 }

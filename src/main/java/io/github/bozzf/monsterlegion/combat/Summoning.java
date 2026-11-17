@@ -1,7 +1,6 @@
 package io.github.bozzf.monsterlegion.combat;
 
 import io.github.bozzf.monsterlegion.entity.LichKingEntity;
-import io.github.bozzf.monsterlegion.registry.ModContent;
 import java.util.List;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -18,7 +17,6 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
@@ -73,15 +71,25 @@ public final class Summoning {
     }
     public static boolean byLich(LichKingEntity lich) {
         if (!(lich.getWorld() instanceof ServerWorld world)) return false;
-        long count = world.getEntitiesByClass(MobEntity.class, lich.getBoundingBox().expand(64),
-                mob -> mob.isAlive() && ((SummonData) mob).monsterLegion$conjured()
-                        && lich.getUuid().equals(((SummonData) mob).monsterLegion$lichOwner())).size();
-        if (count >= 12) return false;
-        MobEntity mob = create(world, lich);
-        if (mob == null) return false;
-        ((SummonData) mob).monsterLegion$lichOwner(lich.getUuid());
-        mob.setTarget(lich.getTarget());
-        return world.spawnEntity(mob);
+        int count = 0;
+        for (ServerWorld dimension : world.getServer().getWorlds()) {
+            for (Entity entity : dimension.iterateEntities()) {
+                if (entity instanceof MobEntity mob && mob.isAlive()
+                        && ((SummonData) mob).monsterLegion$conjured()
+                        && lich.getUuid().equals(((SummonData) mob).monsterLegion$lichOwner())) count++;
+            }
+        }
+        int wanted = Math.min(12 - count, 2 + world.random.nextInt(3));
+        int spawned = 0;
+        for (int i = 0; i < wanted; i++) {
+            MobEntity mob = create(world, lich);
+            if (mob == null) break;
+            ((SummonData) mob).monsterLegion$lichOwner(lich.getUuid());
+            mob.setPersistent();
+            mob.setTarget(lich.getTarget());
+            if (world.spawnEntity(mob)) spawned++;
+        }
+        return spawned > 0;
     }
     public static String byPlayer(ServerPlayerEntity player) {
         MinecraftServer server = player.getServer();
@@ -109,7 +117,6 @@ public final class Summoning {
             return "Não foi possível concluir a invocação.";
         }
         world.spawnParticles(ParticleTypes.ENCHANT, mob.getX(), mob.getBodyY(0.5), mob.getZ(), 30, 0.5, 0.8, 0.5, 0.1);
-        world.playSound(null, player.getX(), player.getY(), player.getZ(), ModContent.SOUNDS.get("summon"), SoundCategory.PLAYERS, 1, 1);
         return null;
     }
     private static void expire(MinecraftServer server, java.util.UUID uuid) {
@@ -126,7 +133,13 @@ public final class Summoning {
     }
     public static void onLoad(MobEntity mob, ServerWorld world) {
         SummonData data = (SummonData) mob;
-        if (data.monsterLegion$playerOwner() == null || !mob.isAlive()) return;
+        if (!mob.isAlive()) return;
+        if (data.monsterLegion$conjured() && data.monsterLegion$lichOwner() != null) {
+            mob.setPersistent();
+            if (StaffSummonState.get(world.getServer()).isLichDead(data.monsterLegion$lichOwner())) expire(mob);
+            return;
+        }
+        if (data.monsterLegion$playerOwner() == null) return;
         if (data.monsterLegion$expiresAt() <= now(world.getServer())) {
             expire(mob);
             return;
@@ -134,6 +147,19 @@ public final class Summoning {
         var slot = StaffSummonState.get(world.getServer()).slots.get(data.monsterLegion$playerOwner());
         // Only invalid/duplicated reservations are discarded, never an expired legitimate summon.
         if (slot == null || !slot.entity().equals(mob.getUuid())) mob.discard();
+    }
+    public static void onLichDeath(LichKingEntity lich) {
+        if (!(lich.getWorld() instanceof ServerWorld world)) return;
+        StaffSummonState.get(world.getServer()).markLichDead(lich.getUuid());
+        for (ServerWorld dimension : world.getServer().getWorlds()) {
+            java.util.List<MobEntity> minions = new java.util.ArrayList<>();
+            for (Entity entity : dimension.iterateEntities()) {
+                if (entity instanceof MobEntity mob && mob.isAlive()
+                        && ((SummonData) mob).monsterLegion$conjured()
+                        && lich.getUuid().equals(((SummonData) mob).monsterLegion$lichOwner())) minions.add(mob);
+            }
+            minions.forEach(Summoning::expire);
+        }
     }
     public static void onDeath(MobEntity mob) {
         SummonData data = (SummonData) mob;
@@ -149,6 +175,7 @@ public final class Summoning {
         to.monsterLegion$playerOwner(from.monsterLegion$playerOwner());
         to.monsterLegion$expiresAt(from.monsterLegion$expiresAt());
         to.monsterLegion$conjured(from.monsterLegion$conjured());
+        if (from.monsterLegion$conjured() && from.monsterLegion$lichOwner() != null) converted.setPersistent();
         if (from.monsterLegion$playerOwner() != null && old.getWorld() instanceof ServerWorld world) {
             StaffSummonState state = StaffSummonState.get(world.getServer());
             state.slots.transfer(from.monsterLegion$playerOwner(), old.getUuid(), converted.getUuid());
@@ -173,8 +200,9 @@ public final class Summoning {
             }
             for (MobEntity mob : loaded) {
                 SummonData data = (SummonData) mob;
-                if (data.monsterLegion$playerOwner() != null) onLoad(mob, world);
-                if (data.monsterLegion$lichOwner() != null && LichAllies.leader(mob) == null) {
+                if (data.monsterLegion$playerOwner() != null || data.monsterLegion$conjured()) onLoad(mob, world);
+                if (!data.monsterLegion$conjured() && data.monsterLegion$lichOwner() != null
+                        && LichAllies.leader(mob) == null) {
                     data.monsterLegion$lichOwner(null);
                     mob.setTarget(null);
                 }

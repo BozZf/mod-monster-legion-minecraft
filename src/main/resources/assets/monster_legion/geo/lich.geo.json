@@ -109,7 +109,7 @@
 					]
 				},
 				{
-					"name": "cajado",
+					"name": "staff_anchor",
 					"parent": "braco_esquerdo",
 					"pivot": [0, 28, -6]
 				},

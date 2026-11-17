@@ -12,12 +12,13 @@ Entidades antigas da versão anterior são migradas para os novos atributos ao c
 
 ### summon
 
-O nome interno da animação fornecida continua `sumon`. No meio da conjuração, nasce **um** morto-vivo adulto escolhido entre zumbi, husk, esqueleto, stray e esqueleto Wither.
+O nome interno da animação fornecida continua `sumon`. Com cooldown de **60 segundos (1.200 ticks)** entre inícios de conjuração, nascem **2 a 4** mortos-vivos adultos, cada um escolhido entre zumbi, husk, esqueleto, stray e esqueleto Wither.
 
-Ele usa um conjunto completo sorteado entre couro, cota de malha, ferro, ouro, diamante e netherita. Os invocados obedecem ao Lich. São procuradas posições com chão sólido e espaço livre perto dele, sem criar chunks; não se exige escuridão para magia. A conjuração não produz um mob se não há posição segura. Há limite de 12 invocados do mesmo Lich carregados a até 64 blocos para conter crescimento da luta.
+Ele usa um conjunto completo sorteado entre couro, cota de malha, ferro, ouro, diamante e netherita. Os invocados obedecem ao Lich. São procuradas posições com chão sólido e espaço livre perto dele, sem criar chunks; não se exige escuridão para magia. A conjuração não produz um mob se não há posição segura. Há limite de 12 invocados vivos e carregados do mesmo Lich, somando todas as dimensões; pouco espaço ou o limite podem reduzir o lote. Eles não têm o prazo de cinco minutos da staff do jogador: são persistentes e mantêm o vínculo mesmo longe ou com o dono descarregado. Ainda podem ser mortos em combate. Quando o Lich morre, suas invocações carregadas morrem normalmente, sem loot nem XP; as descarregadas recebem essa morte ao carregar, usando um registro de morte do dono salvo no mundo.
 
 ### attack_magic
 
+- Cooldown próprio de **10 segundos (200 ticks)** entre inícios de ataque; não é reiniciado por command ou hurt. Os cooldowns de summon e attack_magic são independentes e persistidos no NBT. Uma animação já em execução pode atrasar a próxima magia.
 - Caveira com o renderer e a textura vanilla do Wither.
 - Dano direto base: **8 pontos**, usando o tipo de dano da caveira do Wither.
 - **Wither II por 10 segundos** e **Fome I por 10 segundos**, aplicados somente quando o dano foi aceito; imunidades vanilla dos alvos continuam válidas.
@@ -33,7 +34,7 @@ A magia sorteia um jogador vivo em sobrevivência/aventura a até **32 blocos** 
 
 Uma aura, atualizada a cada segundo, transforma os monstros comuns próximos em aliados do Lich, inclusive membros/comandantes de patrulhas. Eles acompanham e obedecem ao alvo dele por uma meta prioritária, preservando as regras de armadura/XP dos comandantes.
 
-Outros Reis Lich, Withers e invocações pertencentes a jogadores ficam de fora. Mobs vinculados a outro Lich próximo não são roubados continuamente. O vínculo de navegação se mantém a até 48 blocos; quando o dono morre, sai do alcance ou deixa de estar carregado, os aliados naturais voltam à IA comum. Podem ser recrutados novamente quando se aproximarem.
+Outros Reis Lich, Withers e invocações pertencentes a jogadores ficam de fora. Mobs vinculados a outro Lich próximo não são roubados continuamente. O vínculo de navegação se mantém a até 48 blocos; quando o dono morre, sai do alcance ou deixa de estar carregado, os aliados naturais voltam à IA comum. Isso não desfaz a identidade dos monstros conjurados, que permanece vinculada até sua morte ou a morte do Lich. Podem ser recrutados novamente quando se aproximarem.
 
 As regras são de facção/seleção de alvo, não imunidade geral a todo dano em área vanilla.
 
@@ -50,7 +51,7 @@ A staff não é equipamento segurado pela entidade, de modo que o renderer do ca
 
 ## Staff: magia summon
 
-Botão direito invoca um monstro e um conjunto de armadura dos mesmos sorteios da magia do Lich.
+Botão direito invoca **um** monstro e um conjunto de armadura dos mesmos sorteios da magia do Lich, **sem tocar o áudio summon**. O áudio da conjuração do próprio Lich permanece.
 
 - É **aliado do jogador**, acompanha-o e ataca quem o jogador atacou ou quem o feriu recentemente, sem escolher o dono como alvo.
 - Duração de **6.000 ticks = cinco minutos de jogo ativo**. Descarregar chunks ou trocar de dimensão não reinicia o prazo. Ao expirar, o mob recebe dano letal pela rotina normal de morte, com som/animação vanilla e sem drops/XP. Se estiver descarregado, morre assim que carregar. O corpo permanece pelo tempo normal da morte antes da remoção; não se usa desaparecimento direto para expiração.
@@ -74,6 +75,6 @@ O ovo tem entrada própria na aba de ovos do criativo. A staff aparece nas abas 
 
 Ao testar a expiração, observar o som/animação de morte, a permanência breve do corpo e ausência de qualquer item ou XP. A vaga é liberada quando o invocado morre, sem esperar a remoção do corpo. A proteção de drops vale tanto para invocados do Lich quanto para os do jogador, inclusive mortes em combate e com Saque.
 
-Conferir no jogo: sorteio de mobs/armaduras, colisão da caveira sem explosão, efeitos por 10 s, cura gradual no Lich, foco aleatório com dois jogadores, queimadura ao sol, loot em múltiplas mortes e vida/XP. Para a staff, conferir morte, cinco minutos, dois cajados, dois jogadores, troca de dimensão, transformação do mob e save/reload com o invocado descarregado.
+Conferir no jogo: novo encaixe `staff_anchor`, rotação adicional de 180°, cooldowns de 60/10 segundos, morte dos invocados junto ao Lich (incluindo recarga de chunks), sorteio de mobs/armaduras, colisão da caveira sem explosão, efeitos por 10 s, cura gradual no Lich, foco aleatório com dois jogadores, queimadura ao sol, loot em múltiplas mortes e vida/XP. Para a staff, conferir morte, cinco minutos, dois cajados, dois jogadores, troca de dimensão, transformação do mob e save/reload com o invocado descarregado.
 
 Os testes automatizados cobrem os números de combate, orçamento/duração/persistência da cura e exclusividade/transferência da reserva de invocação. O workflow compila o mod e verifica carregamento em servidor dedicado; a observação da luta dentro do jogo permanece necessária.

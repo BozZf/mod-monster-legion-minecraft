@@ -46,6 +46,8 @@ public final class LichAllies {
                         && mob.squaredDistanceTo(lich) <= LichRules.ALLY_RADIUS * LichRules.ALLY_RADIUS)) {
             SummonData data = (SummonData) member;
             if (data.monsterLegion$playerOwner() != null) continue;
+            if (data.monsterLegion$conjured() && data.monsterLegion$lichOwner() != null
+                    && !lich.getUuid().equals(data.monsterLegion$lichOwner())) continue;
             LichKingEntity previous = leader(member);
             if (previous != null && previous != lich) continue;
             data.monsterLegion$lichOwner(lich.getUuid());
@@ -55,7 +57,8 @@ public final class LichAllies {
     public static void release(LichKingEntity lich) {
         if (!(lich.getWorld() instanceof ServerWorld world)) return;
         for (Entity entity : world.iterateEntities()) {
-            if (entity instanceof MobEntity mob && lich.getUuid().equals(((SummonData) mob).monsterLegion$lichOwner())) {
+            if (entity instanceof MobEntity mob && !((SummonData) mob).monsterLegion$conjured()
+                    && lich.getUuid().equals(((SummonData) mob).monsterLegion$lichOwner())) {
                 ((SummonData) mob).monsterLegion$lichOwner(null);
                 mob.setTarget(null);
             }
