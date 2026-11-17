@@ -76,9 +76,9 @@ O modelo `lich.geo(2).json` substitui a geometria de execução; o original tamb
 
 O renderer aplica **180° adicionais** em Y sobre a correção anterior de 90° (total de 270°). A transformação é aplicada ao Lich e às suas camadas, incluindo glowmask e staff. É necessário conferir o resultado visual no jogo, pois testes de compilação não validam a aparência do encaixe.
 
-### Empunhadura inclinada (0.4.5)
+### Empunhadura inclinada (0.4.6)
 
-A pose local da staff segue a sequência fornecida pelo autor: **67° em Z**, depois **90° em Y**, depois **translação (0, 1, 0)** em blocos. A ordem é relevante: a translação é aplicada no espaço local já rotacionado. O renderer mantém seu push/pop e o encaixe no osso `staff_anchor`; a orientação geral do Lich permanece igual.
+A pose local da staff segue a sequência fornecida pelo autor: **67° em Z**, depois **90° em Y**, depois **translação (0, 0.5, 0)** em blocos. A ordem é relevante: a translação é aplicada no espaço local já rotacionado. O renderer mantém seu push/pop e o encaixe no osso `staff_anchor`; a orientação geral do Lich permanece igual.
 
 A pose anterior de 60° e seu alinhamento pelo pixel 20 foram substituídos. Os testes geométricos que fixavam aquela empunhadura foram retirados porque descreviam a pose anterior. Os testes de modelo, anchor, animações e recursos continuam válidos. Conferir a nova posição dentro do jogo.
 
