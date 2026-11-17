@@ -50,7 +50,7 @@ Instale um JDK 21, clone este repositório e abra a pasta como projeto Gradle na
 .\gradlew.bat runClient
 ```
 
-O JAR instalável fica em `build/libs/monster-legion-0.4.11-dev.jar`. Para jogar fora da IDE, instale Fabric Loader, Fabric API e GeckoLib 4.7.6 para 1.21.1 e coloque o JAR em `mods/`. O mod precisa estar no cliente e no servidor. O workflow também disponibiliza os JARs na seção Actions.
+O JAR instalável fica em `build/libs/monster-legion-0.4.12-dev.jar`. Para jogar fora da IDE, instale Fabric Loader, Fabric API e GeckoLib 4.7.6 para 1.21.1 e coloque o JAR em `mods/`. O mod precisa estar no cliente e no servidor. O workflow também disponibiliza os JARs na seção Actions.
 
 ## Testar a liderança provisória
 
