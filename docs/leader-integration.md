@@ -85,3 +85,9 @@ A pose anterior de 60° e seu alinhamento pelo pixel 20 foram substituídos. Os 
 ### Voo e controles (0.4.4)
 
 A orientação e o encaixe do modelo foram mantidos. O Lich agora procura um ponto de visão pelo ar ao perder o jogador; use uma parede baixa, uma coluna e uma cobertura para conferir a perseguição. Para a staff, botão direito invoca e botão esquerdo encerra a invocação; testar mirando ar, bloco e criatura. A proteção solar dos capacetes voltou ao vanilla.
+
+### Modelo da staff com pivot revisado (0.4.7)
+
+O arquivo fornecido `staff.geo(1).json` substitui a geometria da staff tanto no item do jogador quanto no encaixe do Rei Lich. O osso raiz `cajado` tem pivot `[0, 22, 0]`; `cetro`, `caixa`, `adornos` e `joia` são filhos dele. O original fica em `art/leader/original/`.
+
+Texturas, glowmask e a animação da joia permanecem compatíveis. A pose do renderer foi mantida: 67° em Z, 90° em Y e translação local Y de 0,5 bloco. Conferir no jogo o resultado do novo modelo antes de fazer outros ajustes.
