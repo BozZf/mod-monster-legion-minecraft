@@ -1,0 +1,10 @@
+{
+  "entity.monster_legion.lich_king": "Rei Lich",
+  "item.monster_legion.lich_staff": "Cajado do Rei Lich",
+  "item.monster_legion.lich_king_spawn_egg": "Ovo de invocação do Rei Lich",
+  "subtitles.monster_legion.lich.hurt": "Rei Lich sofre dano",
+  "subtitles.monster_legion.lich.death": "Rei Lich morre",
+  "subtitles.monster_legion.lich.magic_bolt": "Projétil mágico",
+  "subtitles.monster_legion.lich.summon": "Rei Lich invoca guardas",
+  "subtitles.monster_legion.lich.command": "Rei Lich comanda a legião"
+}

@@ -14,6 +14,9 @@
   "entrypoints": {
     "main": [
       "io.github.bozzf.monsterlegion.MonsterLegion"
+    ],
+    "client": [
+      "io.github.bozzf.monsterlegion.client.MonsterLegionClient"
     ]
   },
   "mixins": [
@@ -23,6 +26,7 @@
     "fabricloader": ">=0.16.14",
     "minecraft": "1.21.1",
     "java": ">=21",
-    "fabric-api": "*"
+    "fabric-api": "*",
+    "geckolib": ">=4.7.6 <5.0.0"
   }
 }

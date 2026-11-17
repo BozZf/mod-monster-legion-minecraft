@@ -1,0 +1,10 @@
+{
+  "entity.monster_legion.lich_king": "Lich King",
+  "item.monster_legion.lich_staff": "Lich King Staff",
+  "item.monster_legion.lich_king_spawn_egg": "Lich King Spawn Egg",
+  "subtitles.monster_legion.lich.hurt": "Lich King hurts",
+  "subtitles.monster_legion.lich.death": "Lich King dies",
+  "subtitles.monster_legion.lich.magic_bolt": "Magic bolt",
+  "subtitles.monster_legion.lich.summon": "Lich King summons guards",
+  "subtitles.monster_legion.lich.command": "Lich King commands the legion"
+}

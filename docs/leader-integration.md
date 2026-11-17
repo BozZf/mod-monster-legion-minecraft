@@ -1,31 +1,71 @@
-# Integração do monstro líder
+# Rei Lich integrado
 
-## O que enviar
+## Plataforma
 
-- Projeto original do Blockbench (`.bbmodel`), além da textura `.png`.
-- Modelo exportado e animações, se já existirem; informe o formato de exportação.
-- Tamanho desejado, nome e ideia dos ataques/habilidades.
-- Se tiver sons, os arquivos originais e indicação de quando devem tocar.
+Minecraft Java 1.21.1, Fabric Loader 0.16.14+, Fabric API e **GeckoLib 4.7.6**. GeckoLib é dependência obrigatória nos dois lados; instale o JAR Fabric para 1.21.1 em `mods/`. O Gradle baixa a dependência para desenvolvimento automaticamente.
 
-Não é necessário refazer seu modelo agora. Ainda não há dependência de GeckoLib: decidiremos a renderização depois de inspecionar seu arquivo. Modelos Java e modelos animados em `.geo.json` exigem integrações diferentes.
+Não é necessário ativar uma opção global do GeckoLib. O mod registra os controladores de animação, os callbacks de sons/partículas e as camadas emissivas.
 
-## Etapa seguinte no código
+## Teste rápido
 
-1. Registrar `monster_legion:leader` e seus atributos.
-2. Criar a entidade como `PathAwareEntity` (ou subclasse, como `HostileEntity`) e dar a ela a tag `monster_legion.leader` no construtor. Isso conecta o monstro ao sistema atual.
-3. Configurar os objetivos de combate do líder para que ele escolha um alvo.
-4. Registrar renderer e modelo em uma entrada exclusiva de cliente, sem classes gráficas na inicialização comum do servidor.
-5. Copiar os recursos exportados para os caminhos apropriados em `src/main/resources/assets/monster_legion/`.
-6. Criar tradução, ovo de invocação, loot e regras de spawn depois de testar a entidade por invocação.
+```mcfunction
+/summon monster_legion:lich_king ~ ~ ~
+/give @s monster_legion:lich_staff
+/give @s monster_legion:lich_king_spawn_egg
+```
 
-## Verificação dentro do jogo
+O Rei Lich é hostil, voa para se aproximar de jogadores, invoca até dois zumbis por conjuração respeitando o limite da legião, compartilha seu alvo e lança projéteis mágicos. A staff também lança projéteis com botão direito (intervalo de 1,5 segundo). O projétil usa provisoriamente a aparência da pérola do End e causa 8 pontos de dano mágico, sem explosão. O líder tem 120 pontos de vida e não possui geração natural nesta versão.
 
-- O mod inicia tanto no cliente quanto em servidor dedicado.
-- Um líder recruta até 12 monstros permitidos e nunca recruta outro líder.
-- Dois líderes não conseguem possuir o mesmo seguidor.
-- Seguidores ociosos acompanham o líder e tentam atacar seu alvo válido.
-- Morte, remoção da tag, distância e descarregamento desfazem o vínculo.
-- O grupo volta a se formar após salvar/reabrir o mundo.
-- Modelo, textura, animações e sons funcionam sem erros no log.
+Use um mundo de teste. Para verificar cada animação sem esperar pela IA, afaste o líder de jogadores em sobrevivência e use:
 
-Os testes unitários validam as regras de associação. Navegação, prioridade de IA, combate e renderização exigem testes dentro do Minecraft.
+```mcfunction
+/monsterlegion animate @e[type=monster_legion:lich_king,limit=1,sort=nearest] summon
+```
+
+As opções são `idle_float`, `fly_move`, `summon`, `command`, `attack_magic`, `hurt` e `animationdeath`. São prévias visuais de até três segundos: não invocam monstros nem causam dano. A morte real pode ser testada com `/kill @e[type=monster_legion:lich_king,limit=1,sort=nearest]`.
+
+## Partículas e sons
+
+| Animação | Partícula | Momento | Som |
+| --- | --- | --- | --- |
+| `idle_float` | `minecraft:sculk_soul` | Início de cada ciclo | — |
+| `fly_move` | `minecraft:sculk_soul` | Início de cada ciclo | — |
+| `sumon` (nome original mantido) | `minecraft:enchant` | Início | `lich.summon` |
+| `command` | `minecraft:end_rod` | Início | `lich.command` |
+| `attack_magic` | `minecraft:end_rod` | Início | `lich.magic_bolt` |
+| `hurt` | — | Início | `lich.hurt` |
+| `animationdeath` | `minecraft:dust_plume` | 1,39585 s, metade | `lich.death`, no início |
+| `animationdeath` | `minecraft:ash` | 2,7083 s, final | — |
+
+A animação de morte dura 2,7917 s; a entidade permanece por três segundos para os efeitos finais aparecerem. A rotação vanilla de morte foi desativada para não interferir na animação fornecida.
+
+As referências antigas a `.mp3` foram substituídas pelos eventos registrados em `sounds.json`; o som de morte duplicado foi removido. As cópias de execução de hurt/death foram convertidas de estéreo para mono para posicionamento no mundo. Os arquivos originais permanecem intactos em `art/leader/original/`.
+
+Os cinco JSONs de partículas enviados referenciam texturas vanilla. O mod usa os tipos vanilla, sem substituir o namespace `minecraft`. Não há locators nos eventos fornecidos: os efeitos são emitidos ao redor do corpo. Sons e partículas do Rei Lich são callbacks de animação no cliente e dependem de a entidade estar sendo renderizada; não são eventos globais de áudio do servidor.
+
+## Configurações visuais
+
+No primeiro início do cliente, o mod cria `config/monster_legion-client.json`:
+
+```json
+{
+  "enableAnimationParticles": true,
+  "enableAnimationSounds": true,
+  "enableLichGlow": true,
+  "enableStaffGlow": true
+}
+```
+
+Todas as opções começam ativadas. Edite o JSON e reinicie o cliente para aplicar. O arquivo é local a cada jogador e não altera o comportamento do combate no servidor. Ainda não há tela de configuração. O som de ativação da staff é um som de jogabilidade e não é controlado por `enableAnimationSounds`.
+
+As glowmasks são renderizadas com `AutoGlowingGeoLayer` no Rei Lich e na staff. O nome `_glowmask.png` é mantido ao lado da textura correspondente. Brilho emissivo deixa os pixels visíveis no escuro, sem iluminar blocos próximos.
+
+## Arquivos e validação
+
+- Fontes fornecidas: `art/leader/original/`.
+- Recursos usados no jogo: `src/main/resources/assets/monster_legion/`.
+- Classes gráficas e registros de renderers: pacote `client`, carregado exclusivamente pelo entrypoint de cliente.
+- Comportamento e entidades: pacote `entity`.
+- A staff é renderizada no osso `cajado`, acompanhando as transformações do braço; a animação `rotação` da joia é preservada.
+
+Os testes verificam regras de associação, nomes dos ossos, recursos de áudio, sequência dos efeitos da morte e dimensões das glowmasks. Compilação não substitui a verificação dentro do jogo: conferir alinhamento da staff, orientação do modelo, UV, animações em movimento, prioridade de combate, caminhos de voo e efeitos com dois clientes. Sem chunks carregados o grupo é refeito ao retornar, como na base anterior.

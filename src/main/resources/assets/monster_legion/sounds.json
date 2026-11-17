@@ -1,0 +1,32 @@
+{
+  "lich.hurt": {
+    "subtitle": "subtitles.monster_legion.lich.hurt",
+    "sounds": [
+      "monster_legion:lich/hurt"
+    ]
+  },
+  "lich.death": {
+    "subtitle": "subtitles.monster_legion.lich.death",
+    "sounds": [
+      "monster_legion:lich/death"
+    ]
+  },
+  "lich.magic_bolt": {
+    "subtitle": "subtitles.monster_legion.lich.magic_bolt",
+    "sounds": [
+      "monster_legion:lich/magic_bolt"
+    ]
+  },
+  "lich.summon": {
+    "subtitle": "subtitles.monster_legion.lich.summon",
+    "sounds": [
+      "monster_legion:lich/summon"
+    ]
+  },
+  "lich.command": {
+    "subtitle": "subtitles.monster_legion.lich.command",
+    "sounds": [
+      "monster_legion:lich/command"
+    ]
+  }
+}

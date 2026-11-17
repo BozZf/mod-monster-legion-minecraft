@@ -1,5 +1,5 @@
-# Arquivos do líder
+# Arquivos do Rei Lich
 
-Coloque aqui o projeto editável do monstro (por exemplo, `leader.bbmodel` do Blockbench), a textura PNG e referências de animação. Preserve o arquivo original para podermos ajustar a exportação.
+Os arquivos enviados pelo autor estão preservados em `original/`, com seus nomes originais. Os recursos usados no jogo ficam em `src/main/resources/assets/monster_legion/` e incluem normalização de nomes de som e correções dos eventos de partículas conforme solicitado.
 
-Os arquivos desta pasta são fontes de arte e não entram no JAR automaticamente. Veja `docs/leader-integration.md` antes de exportar o modelo definitivo.
+Veja `docs/leader-integration.md` para detalhes, comandos de teste e configurações.

@@ -70,5 +70,12 @@ public final class LegionManager {
         return entity == leader || (entity instanceof PathAwareEntity mob && leaderFor(mob) == leader);
     }
 
+    public static boolean tryRecruit(PathAwareEntity leader, PathAwareEntity member) {
+        if (!(leader.getWorld() instanceof ServerWorld world) || member.getWorld() != world
+                || !isLeader(leader) || isLeader(member) || !member.getType().isIn(RECRUITABLE)) return false;
+        return ROSTERS.computeIfAbsent(world, ignored -> new LegionRoster(MAX_MEMBERS))
+                .recruit(leader.getUuid(), member.getUuid());
+    }
+
     public static void clear() { ROSTERS.clear(); }
 }

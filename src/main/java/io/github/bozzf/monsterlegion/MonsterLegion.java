@@ -17,6 +17,8 @@ public final class MonsterLegion implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        io.github.bozzf.monsterlegion.registry.ModContent.initialize();
+        io.github.bozzf.monsterlegion.command.LichCommands.initialize();
         ServerEntityEvents.ENTITY_LOAD.register((entity, world) -> {
             if (entity instanceof PathAwareEntity mob) {
                 ((MobEntityAccessor) mob).monsterLegion$getGoalSelector()
