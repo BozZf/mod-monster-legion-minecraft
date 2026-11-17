@@ -62,6 +62,7 @@ public final class LichKingEntity extends HostileEntity implements GeoEntity {
         super(type, world);
         moveControl = new FlightMoveControl(this, 20, true);
         setNoGravity(true);
+        setPersistent();
         addCommandTag(LegionManager.LEADER_TAG);
         experiencePoints = LichRules.XP;
     }
@@ -164,6 +165,7 @@ public final class LichKingEntity extends HostileEntity implements GeoEntity {
     }
     @Override public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
+        setPersistent();
         if (nbt.getInt("LichCombatVersion") < 1) {
             float ratio = getMaxHealth() > 0 ? getHealth() / getMaxHealth() : 1;
             getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(LichRules.HEALTH);

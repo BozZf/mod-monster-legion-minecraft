@@ -35,6 +35,13 @@ public final class MonsterLegion implements ModInitializer {
                         .add(2, new FollowLeaderGoal(mob));
             }
         });
+        ServerEntityEvents.ENTITY_UNLOAD.register((entity, world) -> {
+            if (entity instanceof io.github.bozzf.monsterlegion.entity.LichKingEntity lich
+                    && (entity.getRemovalReason() == net.minecraft.entity.Entity.RemovalReason.KILLED
+                    || entity.getRemovalReason() == net.minecraft.entity.Entity.RemovalReason.DISCARDED)) {
+                io.github.bozzf.monsterlegion.combat.Summoning.onLichDeath(lich);
+            }
+        });
         ServerTickEvents.END_WORLD_TICK.register(LegionManager::tick);
         ServerTickEvents.END_WORLD_TICK.register(io.github.bozzf.monsterlegion.patrol.NightPatrols::tick);
         ServerTickEvents.END_SERVER_TICK.register(io.github.bozzf.monsterlegion.combat.Summoning::tick);
