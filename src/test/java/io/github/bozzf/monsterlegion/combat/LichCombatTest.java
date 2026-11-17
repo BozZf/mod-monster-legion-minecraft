@@ -58,6 +58,16 @@ class LichCombatTest {
         assertNull(slots.get(a));
         assertNotNull(slots.get(b));
     }
+    @Test void savedWorldReservationSurvivesNbtRoundTrip() {
+        StaffSummonState state = new StaffSummonState();
+        UUID owner = UUID.randomUUID(), summon = UUID.randomUUID();
+        state.slots.reserve(owner, summon, 8234);
+        var nbt = state.writeNbt(new net.minecraft.nbt.NbtCompound(), null);
+        StaffSummonState restored = StaffSummonState.read(nbt, null);
+        assertEquals(summon, restored.slots.get(owner).entity());
+        assertEquals(8234, restored.slots.get(owner).expiresAt());
+        assertFalse(restored.slots.reserve(owner, UUID.randomUUID(), 15000));
+    }
     @Test void conversionTransfersTheSlotWithoutResettingExpiry() {
         SummonSlots slots = new SummonSlots();
         UUID owner = UUID.randomUUID(), old = UUID.randomUUID(), converted = UUID.randomUUID();

@@ -14,7 +14,7 @@ public final class StaffSummonState extends PersistentState {
     public static StaffSummonState get(MinecraftServer server) {
         return server.getOverworld().getPersistentStateManager().getOrCreate(TYPE, "monster_legion_staff_summons");
     }
-    private static StaffSummonState read(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
+    static StaffSummonState read(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
         StaffSummonState state = new StaffSummonState();
         NbtList list = nbt.getList("Summons", NbtElement.COMPOUND_TYPE);
         for (int i = 0; i < list.size(); i++) {
